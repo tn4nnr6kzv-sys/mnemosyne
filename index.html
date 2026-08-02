@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ma Bibliothèque — cabinet de lecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+:root{
+  --ink:#141310; --panel:#1c1a14; --panel-2:#25221a; --line:#38342a;
+  --paper:#ece4d1; --paper-line:#cabf9f; --paper-ink:#2a2317;
+  --brass:#cda54c; --brass-dim:#a5843a; --sage:#8a9a70;
+  --text:#e9e3d4; --muted:#9a9280; --danger:#c46a52;
+  --wood:#5b3f27;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--ink); color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  overflow:hidden; -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.serif{font-family:'Spectral',Georgia,serif}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--brass-dim);
+}
+button{font-family:inherit; cursor:pointer; color:inherit}
+input,select{font-family:inherit; color:inherit}
+
+/* ---------- Layout ---------- */
+.app{display:grid; grid-template-columns:376px 1fr; height:100vh; height:100dvh}
+.rail{
+  background:linear-gradient(180deg,var(--panel),#171510);
+  border-right:1px solid var(--line);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.brand{padding:22px 24px 18px; border-bottom:1px solid var(--line)}
+.brand h1{
+  margin:0; font-family:'Spectral',serif; font-weight:600; font-size:26px;
+  letter-spacing:.01em; line-height:1.05;
+}
+.brand h1 em{color:var(--brass); font-style:italic; font-weight:500}
+.brand .sub{margin-top:6px; color:var(--muted); font-size:11px; letter-spacing:.14em}
+.brand .sub .count{color:var(--sage)}
+
+.rail-scroll{flex:1; overflow-y:auto; padding:6px 0 40px}
+.rail-scroll::-webkit-scrollbar{width:8px}
+.rail-scroll::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px}
+
+.section{padding:18px 24px; border-bottom:1px solid var(--line)}
+.section > .eyebrow{display:block; margin-bottom:12px}
+
+/* Scan block */
+.scan-btn{
+  width:100%; padding:15px; border:none; border-radius:10px;
+  background:linear-gradient(180deg,var(--brass),var(--brass-dim));
+  color:#20180a; font-weight:600; font-size:15px; letter-spacing:.01em;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  box-shadow:0 6px 20px -8px rgba(205,165,76,.6);
+  transition:transform .12s ease, box-shadow .12s;
+}
+.scan-btn:hover{transform:translateY(-1px); box-shadow:0 10px 26px -8px rgba(205,165,76,.7)}
+.scan-btn:active{transform:translateY(0)}
+.scan-btn svg{width:20px;height:20px}
+.manual{display:flex; gap:8px; margin-top:12px}
+.manual input{
+  flex:1; min-width:0; padding:11px 12px; border-radius:8px;
+  background:var(--panel-2); border:1px solid var(--line); font-size:13px;
+  letter-spacing:.04em;
+}
+.manual input::placeholder{color:var(--muted)}
+.manual input:focus{outline:none; border-color:var(--brass-dim)}
+.mini-btn{
+  padding:0 14px; border-radius:8px; border:1px solid var(--line);
+  background:var(--panel-2); font-size:13px; white-space:nowrap;
+}
+.mini-btn:hover{border-color:var(--brass-dim); color:var(--brass)}
+
+/* Search */
+.search{
+  width:100%; padding:10px 12px; border-radius:8px; background:var(--panel-2);
+  border:1px solid var(--line); font-size:13px;
+}
+.search:focus{outline:none; border-color:var(--brass-dim)}
+
+/* Book list */
+.booklist{display:flex; flex-direction:column; gap:2px; margin-top:4px}
+.book-row{
+  display:flex; gap:11px; align-items:center; padding:8px; border-radius:8px;
+  cursor:pointer; border:1px solid transparent;
+}
+.book-row:hover{background:var(--panel-2)}
+.book-row.active{background:var(--panel-2); border-color:var(--brass-dim)}
+.book-row .cov{
+  width:34px; height:48px; border-radius:2px; flex:none; object-fit:cover;
+  background:var(--wood); box-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+.book-row .meta{min-width:0}
+.book-row .t{font-size:13px; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.book-row .a{font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.empty{color:var(--muted); font-size:12.5px; line-height:1.6; padding:2px 2px 6px}
+
+/* Furniture manager */
+.case{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:10px}
+.case .name{
+  width:100%; background:transparent; border:none; border-bottom:1px solid transparent;
+  font-family:'Spectral',serif; font-size:15px; padding:2px 0; margin-bottom:10px;
+}
+.case .name:focus{outline:none; border-bottom-color:var(--brass-dim)}
+.case .grid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.field label{display:block; font-size:10px; letter-spacing:.1em; color:var(--muted); margin-bottom:4px; text-transform:uppercase}
+.stepper{display:flex; align-items:center; border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.stepper button{width:30px; height:32px; background:var(--panel); border:none; font-size:16px; color:var(--muted)}
+.stepper button:hover{color:var(--brass)}
+.stepper span{flex:1; text-align:center; font-size:13px; font-family:'IBM Plex Mono',monospace}
+.case .rm{margin-top:10px; font-size:11px; color:var(--muted); background:none; border:none; padding:0}
+.case .rm:hover{color:var(--danger)}
+.add-case{
+  width:100%; padding:11px; border-radius:9px; border:1px dashed var(--line);
+  background:none; color:var(--muted); font-size:13px;
+}
+.add-case:hover{border-color:var(--brass-dim); color:var(--brass)}
+
+.io{display:flex; gap:8px}
+.io button{flex:1; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); font-size:12px}
+.io button:hover{border-color:var(--brass-dim); color:var(--brass)}
+
+/* ---------- Stage ---------- */
+.stage{position:relative; overflow:hidden; background:radial-gradient(120% 90% at 50% 0%,#211d15 0%,var(--ink) 70%)}
+#canvas{position:absolute; inset:0; display:block}
+.stage-hint{
+  position:absolute; left:50%; bottom:22px; transform:translateX(-50%);
+  color:var(--muted); font-size:11px; letter-spacing:.08em; pointer-events:none;
+  background:rgba(20,19,16,.5); padding:6px 14px; border-radius:20px; backdrop-filter:blur(4px);
+}
+.stage-tools{position:absolute; top:16px; right:16px; display:flex; gap:8px}
+.tool{
+  width:38px; height:38px; border-radius:9px; border:1px solid var(--line);
+  background:rgba(28,26,20,.75); backdrop-filter:blur(6px); display:grid; place-items:center;
+}
+.tool:hover{border-color:var(--brass-dim); color:var(--brass)}
+.tool svg{width:18px;height:18px}
+.loading{
+  position:absolute; inset:0; display:grid; place-items:center; color:var(--muted);
+  font-size:13px; letter-spacing:.1em; z-index:5;
+}
+
+/* ---------- Catalog card ---------- */
+.card{
+  position:absolute; top:16px; left:16px; width:326px; max-width:calc(100% - 32px);
+  background:var(--paper); color:var(--paper-ink); border-radius:4px;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.75), 0 2px 0 rgba(0,0,0,.2);
+  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease; z-index:6;
+  background-image:repeating-linear-gradient(var(--paper) 0 27px, var(--paper-line) 27px 28px);
+  background-position:0 64px;
+}
+.card.show{opacity:1; transform:none; pointer-events:auto}
+.card .redline{position:absolute; left:44px; top:0; bottom:0; width:1px; background:rgba(180,70,60,.35)}
+.card-head{padding:16px 18px 10px 18px; border-bottom:1px solid var(--paper-line)}
+.card-head .k{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; color:#8a7a55; text-transform:uppercase}
+.card-head h2{margin:6px 0 3px; font-family:'Spectral',serif; font-size:20px; line-height:1.15; font-weight:600}
+.card-head .by{font-size:13px; color:#5c5138; font-style:italic; font-family:'Spectral',serif}
+.card-body{padding:12px 18px 8px 18px; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:2.33}
+.row{display:flex; gap:10px}
+.row .lab{width:74px; color:#8a7a55; flex:none}
+.row .val{color:var(--paper-ink)}
+.stars{color:var(--brass-dim); letter-spacing:2px}
+.review{padding:0 18px; font-family:'Spectral',serif; font-style:italic; font-size:13px; line-height:1.5; color:#5c5138; max-height:96px; overflow:auto}
+.review:not(:empty){padding:2px 18px 10px 18px}
+#cRatingRow.hide{display:none}
+.subjects{padding:2px 18px 14px 18px; display:flex; flex-wrap:wrap; gap:6px}
+.tag{font-family:'IBM Plex Mono',monospace; font-size:10px; padding:2px 8px; border:1px solid var(--paper-line); border-radius:20px; color:#5c5138}
+.card-foot{display:flex; gap:8px; padding:12px 16px 16px; border-top:1px solid var(--paper-line)}
+.card-foot select{flex:1; padding:8px; border-radius:6px; border:1px solid var(--paper-line); background:#f3ecda; color:var(--paper-ink); font-size:12px}
+.card-foot .del{width:38px; border-radius:6px; border:1px solid var(--paper-line); background:#f3ecda; color:var(--danger); font-size:15px}
+.card-foot .del:hover{background:var(--danger); color:#fff; border-color:var(--danger)}
+.card-close{position:absolute; top:10px; right:12px; background:none; border:none; font-size:20px; line-height:1; color:#8a7a55}
+.card-close:hover{color:var(--paper-ink)}
+
+/* ---------- Modal / scan ---------- */
+.overlay{
+  position:fixed; inset:0; background:rgba(10,9,7,.78); backdrop-filter:blur(6px);
+  display:none; place-items:center; z-index:50; padding:20px;
+}
+.overlay.show{display:grid}
+.sheet{
+  width:min(440px,100%); background:var(--panel); border:1px solid var(--line);
+  border-radius:16px; overflow:hidden; box-shadow:0 40px 90px -30px #000;
+}
+.sheet-head{padding:16px 20px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center}
+.sheet-head h3{margin:0; font-family:'Spectral',serif; font-size:18px; font-weight:600}
+.sheet-head button{background:none; border:none; font-size:22px; color:var(--muted)}
+.sheet-head button:hover{color:var(--text)}
+#reader{width:100%; min-height:280px; background:#000}
+#reader video{border-radius:0!important}
+.sheet-note{padding:12px 20px; color:var(--muted); font-size:12px; line-height:1.5; text-align:center}
+.sheet-note.err{color:var(--danger)}
+
+/* confirm add */
+.confirm{padding:18px 20px 20px}
+.confirm .head{display:flex; gap:14px; margin-bottom:14px}
+.confirm img{width:64px; height:92px; object-fit:cover; border-radius:3px; background:var(--wood); flex:none; box-shadow:0 3px 10px rgba(0,0,0,.5)}
+.confirm .t{font-family:'Spectral',serif; font-size:18px; line-height:1.2; margin-bottom:4px}
+.confirm .a{color:var(--muted); font-size:13px}
+.confirm .isbn{margin-top:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass-dim); letter-spacing:.08em}
+.confirm label{display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:14px 0 6px}
+.confirm select{width:100%; padding:11px; border-radius:8px; background:var(--panel-2); border:1px solid var(--line); font-size:13px}
+.confirm .acts{display:flex; gap:10px; margin-top:16px}
+.confirm .acts button{flex:1; padding:12px; border-radius:9px; font-size:14px; font-weight:500; border:1px solid var(--line); background:var(--panel-2)}
+.confirm .acts .ok{background:linear-gradient(180deg,var(--brass),var(--brass-dim)); color:#20180a; border:none; font-weight:600}
+.confirm .acts .ok:disabled{opacity:.5}
+.spinner{display:inline-block; width:15px; height:15px; border:2px solid rgba(205,165,76,.3); border-top-color:var(--brass); border-radius:50%; animation:spin .7s linear infinite; vertical-align:-2px; margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translate(-50%,20px); opacity:0;
+  background:var(--panel-2); border:1px solid var(--brass-dim); color:var(--text);
+  padding:12px 20px; border-radius:10px; font-size:13px; z-index:80; transition:.25s;
+  box-shadow:0 12px 30px -12px #000;
+}
+.toast.show{transform:translate(-50%,0); opacity:1}
+
+/* ---------- Responsive ---------- */
+@media (max-width:860px){
+  .app{grid-template-columns:1fr; grid-template-rows:44vh 1fr}
+  .rail{grid-row:2; border-right:none; border-top:1px solid var(--line)}
+  .stage{grid-row:1}
+  .card{width:calc(100% - 32px)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ RAIL ============ -->
+  <aside class="rail">
+    <div class="brand">
+      <h1 class="serif">Ma <em>Bibliothèque</em></h1>
+      <div class="sub mono"><span class="count" id="stat">0 volumes</span> · cabinet de lecture</div>
+    </div>
+    <div class="rail-scroll">
+
+      <div class="section">
+        <span class="eyebrow">Entrée au catalogue</span>
+        <button class="scan-btn" id="openScan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M3 12h18"/></svg>
+          Scanner un code-barres
+        </button>
+        <div class="manual">
+          <input id="isbnInput" class="mono" placeholder="ou saisir l'ISBN…" inputmode="numeric" autocomplete="off">
+          <button class="mini-btn" id="addManual">Chercher</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <span class="eyebrow">Les volumes</span>
+        <input class="search" id="search" placeholder="Rechercher un titre, un auteur…">
+        <div class="booklist" id="booklist"></div>
+      </div>
+
+      <div class="section">
+        <span class="eyebrow">Le mobilier</span>
+        <div id="cases"></div>
+        <button class="add-case" id="addCase">+ Ajouter une bibliothèque</button>
+      </div>
+
+      <div class="section">
+        <span class="eyebrow">Le fichier</span>
+        <div class="io">
+          <button id="exportBtn">Exporter .json</button>
+          <button id="exportCsvBtn">Exporter .csv</button>
+        </div>
+        <div class="io" style="margin-top:8px">
+          <button id="importBtn">Importer un fichier (.json / .csv Goodreads)</button>
+          <input type="file" id="importFile" accept=".json,.csv,application/json,text/csv" hidden>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ============ STAGE ============ -->
+  <main class="stage">
+    <div class="loading" id="loading">Assemblage du mobilier…</div>
+    <canvas id="canvas"></canvas>
+    <div class="stage-tools">
+      <button class="tool" id="resetView" title="Recadrer la vue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 1 9 9M3 12v-5M3 12h5"/></svg>
+      </button>
+    </div>
+    <div class="stage-hint mono">Glisser pour tourner · molette pour zoomer · cliquer un livre</div>
+
+    <!-- Catalog card -->
+    <div class="card" id="card">
+      <div class="redline"></div>
+      <button class="card-close" id="cardClose">×</button>
+      <div class="card-head">
+        <div class="k">Fiche de catalogue</div>
+        <h2 id="cTitle"></h2>
+        <div class="by" id="cAuthor"></div>
+      </div>
+      <div class="card-body">
+        <div class="row"><span class="lab">Éditeur</span><span class="val" id="cPub"></span></div>
+        <div class="row"><span class="lab">Année</span><span class="val" id="cYear"></span></div>
+        <div class="row"><span class="lab">Pages</span><span class="val" id="cPages"></span></div>
+        <div class="row"><span class="lab">ISBN</span><span class="val mono" id="cIsbn"></span></div>
+        <div class="row" id="cRatingRow"><span class="lab">Note</span><span class="val stars" id="cRating"></span></div>
+      </div>
+      <div class="review" id="cReview"></div>
+      <div class="subjects" id="cSubjects"></div>
+      <div class="card-foot">
+        <select id="cShelf"></select>
+        <button class="del" id="cDelete" title="Retirer du catalogue">🗑</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ SCAN MODAL ============ -->
+<div class="overlay" id="scanOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3 class="serif">Présenter le code-barres</h3>
+      <button id="closeScan">×</button>
+    </div>
+    <div id="reader"></div>
+    <div class="sheet-note" id="scanNote">Autorisez la caméra, puis cadrez le code-barres du livre.</div>
+  </div>
+</div>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div class="overlay" id="confirmOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3 class="serif">Ajouter au catalogue</h3>
+      <button id="closeConfirm">×</button>
+    </div>
+    <div class="confirm" id="confirmBody"></div>
+  </div>
+</div>
+
+<!-- ============ IMPORT MODAL ============ -->
+<div class="overlay" id="importOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3 class="serif">Importer une bibliothèque</h3>
+      <button id="closeImport">×</button>
+    </div>
+    <div class="confirm" id="importBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ============================================================
+   ÉTAT & PERSISTANCE
+   ============================================================ */
+const KEY = 'biblio3d_v1';
+const uid = () => Math.random().toString(36).slice(2,9);
+
+let state = load() || {
+  bookcases: [{ id: uid(), name: 'Bibliothèque du salon', shelves: 5, width: 90 }],
+  books: []
+};
+
+function load(){
+  try { return JSON.parse(localStorage.getItem(KEY)); } catch(e){ return null; }
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ toast("Sauvegarde impossible (mode privé ?)"); }
+}
+
+/* ============================================================
+   RECHERCHE ISBN  (Open Library → Google Books)
+   ============================================================ */
+function cleanISBN(s){ return (s||'').replace(/[^0-9Xx]/g,'').toUpperCase(); }
+
+async function lookupISBN(isbn){
+  isbn = cleanISBN(isbn);
+  // 1. Open Library
+  try {
+    const r = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+    const j = await r.json();
+    const d = j['ISBN:'+isbn];
+    if(d) return {
+      isbn,
+      title: d.title || 'Sans titre',
+      authors: (d.authors||[]).map(a=>a.name),
+      publisher: (d.publishers||[]).map(p=>p.name).join(', '),
+      year: (d.publish_date||'').match(/\d{4}/)?.[0] || '',
+      pages: d.number_of_pages || 0,
+      cover: d.cover?.medium || `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`,
+      subjects: (d.subjects||[]).slice(0,4).map(s=>s.name)
+    };
+  } catch(e){}
+  // 2. Google Books (souvent meilleur pour les titres FR)
+  try {
+    const r = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+    const j = await r.json();
+    if(j.totalItems>0){
+      const v = j.items[0].volumeInfo;
+      return {
+        isbn,
+        title: v.title + (v.subtitle ? ' — '+v.subtitle : ''),
+        authors: v.authors || [],
+        publisher: v.publisher || '',
+        year: (v.publishedDate||'').match(/\d{4}/)?.[0] || '',
+        pages: v.pageCount || 0,
+        cover: v.imageLinks?.thumbnail?.replace('http:','https:') || `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`,
+        subjects: (v.categories||[]).slice(0,4)
+      };
+    }
+  } catch(e){}
+  return null;
+}
+
+/* Couleur de tranche : reliure « toilée » stable dérivée du titre */
+function spineColor(str){
+  let h=0; for(const c of (str||'x')) h=(h*31+c.charCodeAt(0))>>>0;
+  const hue = h % 360;
+  const sat = 26 + (h>>3)%22;      // 26–48 %  (tissu, pas fluo)
+  const lig = 30 + (h>>7)%16;      // 30–46 %  (foncé, cossu)
+  return `hsl(${hue} ${sat}% ${lig}%)`;
+}
+
+/* ============================================================
+   RENDU 3D
+   ============================================================ */
+const canvas = document.getElementById('canvas');
+const stageEl = document.querySelector('.stage');
+let renderer, scene, camera, controls, raycaster, pointer;
+let booksGroup, furnitureGroup;
+const bookMeshes = [];        // meshes cliquables
+let selectedId = null;
+let hovered = null;
+
+// Constantes de mobilier (unités = cm)
+const SHELF_GAP = 30, DEPTH = 22, PLANK = 2.4, SIDE = 2.4, CASE_GAP = 26;
+
+function initThree(){
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color('#141310');
+  scene.fog = new THREE.Fog('#141310', 340, 620);
+
+  camera = new THREE.PerspectiveCamera(42, 1, 1, 2000);
+  camera.position.set(0, 90, 240);
+
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 70;
+  controls.maxDistance = 520;
+  controls.maxPolarAngle = Math.PI*0.52;
+  controls.target.set(0, 70, 0);
+
+  // Lumières — ambiance salle de lecture
+  scene.add(new THREE.HemisphereLight('#42506a', '#2a2016', 0.55));
+  const key = new THREE.DirectionalLight('#ffd9a0', 1.15);
+  key.position.set(-120, 220, 180);
+  scene.add(key);
+  const warm = new THREE.PointLight('#ffb765', 0.9, 700, 1.4);
+  warm.position.set(80, 140, 120);
+  scene.add(warm);
+  const fill = new THREE.DirectionalLight('#7f93c0', 0.35);
+  fill.position.set(160, 90, -120);
+  scene.add(fill);
+
+  // Sol
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(1600, 1600),
+    new THREE.MeshStandardMaterial({ color:'#1a1712', roughness:0.95, metalness:0 })
+  );
+  floor.rotation.x = -Math.PI/2;
+  scene.add(floor);
+
+  furnitureGroup = new THREE.Group();
+  booksGroup = new THREE.Group();
+  scene.add(furnitureGroup, booksGroup);
+
+  raycaster = new THREE.Raycaster();
+  pointer = new THREE.Vector2();
+
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('resize', resize);
+
+  resize();
+  rebuild(true);
+  animate();
+  document.getElementById('loading').style.display='none';
+}
+
+function resize(){
+  const w = stageEl.clientWidth, h = stageEl.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+
+/* Matériaux bois réutilisés */
+const woodMat = new THREE.MeshStandardMaterial({ color:'#5b3f27', roughness:0.7, metalness:0.05 });
+const woodDark = new THREE.MeshStandardMaterial({ color:'#43301d', roughness:0.75 });
+
+function box(w,h,d,mat){ return new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); }
+
+/* Layout horizontal des bibliothèques */
+function caseLayout(){
+  const total = state.bookcases.reduce((s,c)=>s+c.width,0) + CASE_GAP*(state.bookcases.length-1);
+  let x = -total/2;
+  return state.bookcases.map(c=>{
+    const cx = x + c.width/2; x += c.width + CASE_GAP;
+    return { case:c, cx };
+  });
+}
+
+function buildFurniture(layout){
+  furnitureGroup.clear();
+  for(const {case:c, cx} of layout){
+    const g = new THREE.Group(); g.position.x = cx;
+    const H = c.shelves*SHELF_GAP + PLANK;
+    // côtés
+    const l = box(SIDE, H, DEPTH, woodMat); l.position.set(-c.width/2, H/2, 0);
+    const r = box(SIDE, H, DEPTH, woodMat); r.position.set( c.width/2, H/2, 0);
+    // fond
+    const back = box(c.width, H, 1, woodDark); back.position.set(0, H/2, -DEPTH/2+0.5);
+    g.add(l,r,back);
+    // planches
+    for(let i=0;i<=c.shelves;i++){
+      const p = box(c.width, PLANK, DEPTH, woodMat);
+      p.position.set(0, i*SHELF_GAP, 0);
+      g.add(p);
+    }
+    furnitureGroup.add(g);
+  }
+}
+
+/* Texture de tranche : couleur + titre gravé verticalement */
+const texCache = new Map();
+function spineTexture(book){
+  const kkey = book.id+'|'+book.title+'|'+book.spineColor;
+  if(texCache.has(kkey)) return texCache.get(kkey);
+  const W=140, H=560, c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  x.fillStyle = book.spineColor; x.fillRect(0,0,W,H);
+  // grain vertical léger
+  const grd = x.createLinearGradient(0,0,W,0);
+  grd.addColorStop(0,'rgba(255,255,255,.07)'); grd.addColorStop(.5,'rgba(0,0,0,0)'); grd.addColorStop(1,'rgba(0,0,0,.22)');
+  x.fillStyle=grd; x.fillRect(0,0,W,H);
+  // bandeaux de reliure
+  x.fillStyle='rgba(0,0,0,.22)'; x.fillRect(0,34,W,4); x.fillRect(0,H-38,W,4);
+  x.fillStyle='rgba(205,165,76,.55)'; x.fillRect(0,44,W,2); x.fillRect(0,H-46,W,2);
+  // titre
+  const light = isLight(book.spineColor);
+  x.save(); x.translate(W/2, H-64); x.rotate(-Math.PI/2);
+  x.fillStyle = light ? '#2a2317' : '#f2ead6';
+  x.font = "600 30px Spectral, Georgia, serif"; x.textBaseline='middle';
+  let t = book.title || ''; if(t.length>30) t=t.slice(0,29)+'…';
+  x.fillText(t, 0, -2);
+  // auteur
+  x.font = "500 19px Inter, sans-serif";
+  x.fillStyle = light ? 'rgba(42,35,23,.75)' : 'rgba(242,234,214,.7)';
+  let a = (book.authors&&book.authors[0])||''; if(a.length>26) a=a.slice(0,25)+'…';
+  x.fillText(a, H-150, -2);
+  x.restore();
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  texCache.set(kkey, tex);
+  return tex;
+}
+function isLight(hsl){
+  const m = hsl.match(/hsl\((\d+) (\d+)% (\d+)%\)/); if(!m) return false;
+  return (+m[3]) > 55;
+}
+
+function bookDims(b){
+  const hnum = hashNum(b.title||b.isbn);
+  const thick = Math.max(1.6, Math.min(6, (b.pages||220)/34));
+  const height = 19 + (hnum % 9);          // 19–27 cm, effet « vraie étagère »
+  const depth  = 15 + (hnum>>4)%4;
+  return { thick, height, depth };
+}
+function hashNum(s){ let h=0; for(const c of (s||'x')) h=(h*33+c.charCodeAt(0))>>>0; return h; }
+
+function buildBooks(layout){
+  booksGroup.clear(); bookMeshes.length = 0;
+  const byCase = new Map(layout.map(o=>[o.case.id,o]));
+
+  for(const {case:c, cx} of layout){
+    for(let s=0; s<c.shelves; s++){
+      const shelfBooks = state.books.filter(b=>b.bookcaseId===c.id && b.shelf===s);
+      let cursor = -c.width/2 + SIDE + 2;         // bord intérieur gauche
+      const baseY = s*SHELF_GAP + PLANK;
+      for(const b of shelfBooks){
+        const {thick,height,depth} = bookDims(b);
+        const solid = new THREE.MeshStandardMaterial({ color:b.spineColor, roughness:0.62, metalness:0.02 });
+        const spineFace = new THREE.MeshStandardMaterial({ map:spineTexture(b), roughness:0.55 });
+        // ordre BoxGeometry: px,nx,py,ny,pz,nz  → face +Z (index 4) = tranche visible
+        const mats = [solid,solid,solid.clone(),solid.clone(),spineFace,solid.clone()];
+        mats[2].color.multiplyScalar(1.12);       // dessus un peu plus clair
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(thick,height,depth), mats);
+        mesh.position.set(cx + cursor + thick/2, baseY + height/2, DEPTH/2 - depth/2 - 1.5);
+        mesh.userData = { id:b.id, base:{y:baseY+height/2} };
+        booksGroup.add(mesh); bookMeshes.push(mesh);
+        cursor += thick + 0.4;
+      }
+    }
+  }
+  applySelectionVisual();
+}
+
+function rebuild(recenter=false){
+  const layout = caseLayout();
+  buildFurniture(layout);
+  buildBooks(layout);
+  renderList();
+  renderCases();
+  renderShelfSelect();
+  updateStat();
+  save();
+  if(recenter) frameAll(layout);
+}
+
+function frameAll(layout){
+  if(!layout) layout = caseLayout();
+  const total = state.bookcases.reduce((s,c)=>s+c.width,0) + CASE_GAP*(state.bookcases.length-1);
+  const maxH = Math.max(...state.bookcases.map(c=>c.shelves*SHELF_GAP),120);
+  controls.target.set(0, maxH*0.5, 0);
+  const dist = Math.max(total*0.9, maxH*1.4, 190);
+  camera.position.set(total*0.12, maxH*0.62+30, dist);
+  controls.update();
+}
+
+/* Sélection visuelle */
+function applySelectionVisual(){
+  for(const m of bookMeshes){
+    const on = m.userData.id === selectedId;
+    for(const mat of m.material){ mat.emissive?.setHex(on?0x4a3a12:0x000000); }
+    m.position.y = m.userData.base.y + (on?1.4:0);
+  }
+}
+
+function onPointerMove(e){
+  const r = canvas.getBoundingClientRect();
+  pointer.x = ((e.clientX-r.left)/r.width)*2-1;
+  pointer.y = -((e.clientY-r.top)/r.height)*2+1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(bookMeshes,false)[0];
+  const id = hit?.object.userData.id || null;
+  if(id!==hovered){ hovered=id; canvas.style.cursor = id?'pointer':'grab'; }
+}
+function onPointerDown(e){
+  const r = canvas.getBoundingClientRect();
+  pointer.x = ((e.clientX-r.left)/r.width)*2-1;
+  pointer.y = -((e.clientY-r.top)/r.height)*2+1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(bookMeshes,false)[0];
+  if(hit) selectBook(hit.object.userData.id, false);
+}
+
+let intro = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  if(intro < 1){ intro += 0.012; controls.update(); }
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+/* ============================================================
+   INTERFACE (liste, fiche, mobilier)
+   ============================================================ */
+const $ = id => document.getElementById(id);
+
+function updateStat(){
+  const n = state.books.length;
+  $('stat').textContent = `${n} volume${n>1?'s':''}`;
+}
+
+function renderList(filter=''){
+  const list = $('booklist'); list.innerHTML='';
+  const f = filter.trim().toLowerCase();
+  const books = state.books
+    .filter(b => !f || (b.title+' '+(b.authors||[]).join(' ')).toLowerCase().includes(f))
+    .sort((a,b)=> (a.title||'').localeCompare(b.title||''));
+  if(!books.length){
+    list.innerHTML = state.books.length
+      ? '<div class="empty">Aucun volume ne correspond.</div>'
+      : '<div class="empty">Le catalogue est vide.<br>Scannez un premier livre pour commencer.</div>';
+    return;
+  }
+  for(const b of books){
+    const row = document.createElement('div');
+    row.className = 'book-row'+(b.id===selectedId?' active':'');
+    row.innerHTML = `
+      <img class="cov" src="${b.cover||''}" alt="" onerror="this.style.visibility='hidden'">
+      <div class="meta">
+        <div class="t">${esc(b.title)}</div>
+        <div class="a">${esc((b.authors||[]).join(', ')||'—')}</div>
+      </div>`;
+    row.onclick = ()=> selectBook(b.id, true);
+    list.appendChild(row);
+  }
+}
+
+function selectBook(id, fromList){
+  selectedId = id;
+  applySelectionVisual();
+  renderList($('search').value);
+  const b = state.books.find(x=>x.id===id);
+  if(!b) return closeCard();
+  // remplir la fiche
+  $('cTitle').textContent = b.title || '—';
+  $('cAuthor').textContent = (b.authors||[]).join(', ') || '';
+  $('cPub').textContent = b.publisher || '—';
+  $('cYear').textContent = b.year || '—';
+  $('cPages').textContent = b.pages ? b.pages+' p.' : '—';
+  $('cIsbn').textContent = b.isbn || '—';
+  const r = Math.round(b.rating||0);
+  const rrow = $('cRatingRow');
+  if(r>0){ rrow.classList.remove('hide'); $('cRating').textContent = '★'.repeat(r)+'☆'.repeat(5-r); }
+  else { rrow.classList.add('hide'); }
+  $('cReview').textContent = b.review || '';
+  const subj = $('cSubjects'); subj.innerHTML='';
+  (b.subjects||[]).forEach(s=>{ const t=document.createElement('span'); t.className='tag'; t.textContent=s; subj.appendChild(t); });
+  // sélecteur d'étagère
+  const sel = $('cShelf'); sel.innerHTML = shelfOptions(b.bookcaseId, b.shelf);
+  sel.onchange = ()=>{ const [bc,sh]=sel.value.split('|'); b.bookcaseId=bc; b.shelf=+sh; rebuild(); toast('Rangé ailleurs.'); };
+  $('cDelete').onclick = ()=>{ if(confirm('Retirer « '+b.title+' » du catalogue ?')){ state.books=state.books.filter(x=>x.id!==id); selectedId=null; closeCard(); rebuild(); } };
+  $('card').classList.add('show');
+  if(fromList) focusBook(id);
+}
+function closeCard(){ $('card').classList.remove('show'); selectedId=null; applySelectionVisual(); renderList($('search').value); }
+$('cardClose').onclick = closeCard;
+
+function focusBook(id){
+  const m = bookMeshes.find(x=>x.userData.id===id); if(!m) return;
+  const p = m.getWorldPosition(new THREE.Vector3());
+  controls.target.lerp(p, 0.9);
+  controls.update();
+}
+
+function shelfOptions(bcId, shelf){
+  let html='';
+  for(const c of state.bookcases){
+    for(let s=0;s<c.shelves;s++){
+      const val = c.id+'|'+s, sel = (c.id===bcId && s===shelf)?'selected':'';
+      html += `<option value="${val}" ${sel}>${esc(c.name)} — étagère ${s+1}</option>`;
+    }
+  }
+  return html;
+}
+
+function renderShelfSelect(){ /* placeholder — la fiche régénère à l'ouverture */ }
+
+/* ------- Mobilier ------- */
+function renderCases(){
+  const wrap = $('cases'); wrap.innerHTML='';
+  state.bookcases.forEach(c=>{
+    const el = document.createElement('div'); el.className='case';
+    el.innerHTML = `
+      <input class="name serif" value="${esc(c.name)}">
+      <div class="grid">
+        <div class="field">
+          <label>Étagères</label>
+          <div class="stepper" data-k="shelves">
+            <button data-d="-1">−</button><span>${c.shelves}</span><button data-d="1">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Largeur (cm)</label>
+          <div class="stepper" data-k="width">
+            <button data-d="-10">−</button><span>${c.width}</span><button data-d="10">+</button>
+          </div>
+        </div>
+      </div>
+      <button class="rm">Supprimer cette bibliothèque</button>`;
+    el.querySelector('.name').onchange = e => { c.name = e.target.value || 'Sans nom'; rebuild(); };
+    el.querySelectorAll('.stepper button').forEach(btn=>{
+      btn.onclick = ()=>{
+        const k = btn.parentElement.dataset.k, d = +btn.dataset.d;
+        if(k==='shelves'){ c.shelves = Math.max(1, Math.min(12, c.shelves+d));
+          state.books.forEach(b=>{ if(b.bookcaseId===c.id && b.shelf>=c.shelves) b.shelf=c.shelves-1; });
+        }
+        else c.width = Math.max(40, Math.min(200, c.width+d));
+        rebuild();
+      };
+    });
+    el.querySelector('.rm').onclick = ()=>{
+      const has = state.books.some(b=>b.bookcaseId===c.id);
+      if(state.bookcases.length===1){ toast('Gardez au moins une bibliothèque.'); return; }
+      if(has && !confirm('Cette bibliothèque contient des livres. Les supprimer aussi ?')) return;
+      state.books = state.books.filter(b=>b.bookcaseId!==c.id);
+      state.bookcases = state.bookcases.filter(x=>x.id!==c.id);
+      rebuild(true);
+    };
+    wrap.appendChild(el);
+  });
+}
+$('addCase').onclick = ()=>{
+  state.bookcases.push({ id:uid(), name:'Nouvelle bibliothèque', shelves:5, width:90 });
+  rebuild(true);
+};
+
+/* ============================================================
+   FLUX D'AJOUT (scan / manuel → confirmation)
+   ============================================================ */
+let html5Qr = null;
+
+$('openScan').onclick = startScan;
+$('closeScan').onclick = stopScan;
+$('scanOverlay').onclick = e => { if(e.target.id==='scanOverlay') stopScan(); };
+
+async function startScan(){
+  $('scanOverlay').classList.add('show');
+  const note = $('scanNote'); note.className='sheet-note'; note.textContent='Démarrage de la caméra…';
+  if(typeof Html5Qrcode === 'undefined'){ note.className='sheet-note err'; note.textContent="Le module caméra n'a pas pu se charger (connexion ?)."; return; }
+  try{
+    html5Qr = new Html5Qrcode('reader', { formatsToSupport:[ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8 ] });
+    await html5Qr.start(
+      { facingMode:'environment' },
+      { fps:10, qrbox:{ width:260, height:150 } },
+      onScan,
+      ()=>{}
+    );
+    note.textContent='Cadrez le code-barres à l’arrière du livre.';
+  }catch(err){
+    note.className='sheet-note err';
+    note.textContent = "Caméra indisponible. Utilisez la saisie manuelle de l'ISBN. ("+(err?.message||err)+")";
+  }
+}
+async function stopScan(){
+  $('scanOverlay').classList.remove('show');
+  if(html5Qr){ try{ await html5Qr.stop(); html5Qr.clear(); }catch(e){} html5Qr=null; }
+}
+let lastScan=0;
+async function onScan(text){
+  const now=Date.now(); if(now-lastScan<1500) return; lastScan=now;
+  const isbn = cleanISBN(text);
+  if(!/^(97[89]\d{10}|\d{9}[0-9X])$/.test(isbn)) return; // pas un ISBN
+  if(navigator.vibrate) navigator.vibrate(40);
+  await stopScan();
+  handleISBN(isbn);
+}
+
+$('addManual').onclick = ()=> { const v=$('isbnInput').value; if(v) handleISBN(v); };
+$('isbnInput').addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target.value) handleISBN(e.target.value); });
+
+async function handleISBN(raw){
+  const isbn = cleanISBN(raw);
+  $('isbnInput').value='';
+  if(state.books.some(b=>b.isbn===isbn)){ toast('Ce volume est déjà au catalogue.'); const ex=state.books.find(b=>b.isbn===isbn); selectBook(ex.id,true); return; }
+  openConfirm(null, isbn, true);           // état « chargement »
+  const data = await lookupISBN(isbn);
+  if(!data){ openConfirm(null, isbn, false); return; }
+  openConfirm(data, isbn, false);
+}
+
+function openConfirm(data, isbn, loading){
+  const body = $('confirmBody');
+  $('confirmOverlay').classList.add('show');
+  if(loading){
+    body.innerHTML = `<div class="sheet-note"><span class="spinner"></span>Recherche de « ${isbn} »…</div>`;
+    return;
+  }
+  if(!data){
+    body.innerHTML = `
+      <div class="sheet-note err">Aucune fiche trouvée pour l’ISBN ${esc(isbn)}.</div>
+      <label>Titre (saisie manuelle)</label>
+      <input id="manTitle" class="search" placeholder="Titre du livre">
+      <label>Auteur</label>
+      <input id="manAuthor" class="search" placeholder="Auteur">
+      <label>Ranger dans</label>
+      <select id="manShelf">${shelfOptions(state.bookcases[0].id,0)}</select>
+      <div class="acts">
+        <button id="cCancel">Annuler</button>
+        <button class="ok" id="cAddMan">Ajouter</button>
+      </div>`;
+    $('cCancel').onclick = closeConfirm;
+    $('cAddMan').onclick = ()=>{
+      const t=$('manTitle').value.trim(); if(!t){ toast('Indiquez au moins un titre.'); return; }
+      const [bc,sh]=$('manShelf').value.split('|');
+      addBook({ isbn, title:t, authors:$('manAuthor').value?[$('manAuthor').value]:[], publisher:'', year:'', pages:0, cover:`https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`, subjects:[] }, bc, +sh);
+    };
+    return;
+  }
+  body.innerHTML = `
+    <div class="head">
+      <img src="${esc(data.cover)}" alt="" onerror="this.style.visibility='hidden'">
+      <div>
+        <div class="t serif">${esc(data.title)}</div>
+        <div class="a">${esc(data.authors.join(', ')||'Auteur inconnu')}</div>
+        <div class="isbn">ISBN ${esc(isbn)}${data.year?' · '+data.year:''}${data.pages?' · '+data.pages+' p.':''}</div>
+      </div>
+    </div>
+    <label>Ranger dans</label>
+    <select id="cShelfPick">${shelfOptions(state.bookcases[0].id,0)}</select>
+    <div class="acts">
+      <button id="cCancel">Annuler</button>
+      <button class="ok" id="cAdd">Ajouter au catalogue</button>
+    </div>`;
+  $('cCancel').onclick = closeConfirm;
+  $('cAdd').onclick = ()=>{ const [bc,sh]=$('cShelfPick').value.split('|'); addBook(data, bc, +sh); };
+}
+$('closeConfirm').onclick = closeConfirm;
+$('confirmOverlay').onclick = e => { if(e.target.id==='confirmOverlay') closeConfirm(); };
+function closeConfirm(){ $('confirmOverlay').classList.remove('show'); }
+
+function addBook(data, bcId, shelf){
+  const b = { id:uid(), ...data, bookcaseId:bcId, shelf, spineColor:spineColor(data.title+data.isbn), added:Date.now() };
+  state.books.push(b);
+  closeConfirm();
+  rebuild();
+  selectBook(b.id, true);
+  toast('« '+b.title.slice(0,40)+' » ajouté.');
+}
+
+/* ============================================================
+   RECHERCHE, IMPORT/EXPORT, DIVERS
+   ============================================================ */
+$('search').addEventListener('input', e=> renderList(e.target.value));
+$('resetView').onclick = ()=> frameAll();
+
+function download(text, name, mime){
+  const blob = new Blob([text], {type:mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ---------- Export JSON (état complet) ---------- */
+$('exportBtn').onclick = ()=>{
+  download(JSON.stringify(state,null,2), 'ma-bibliotheque.json', 'application/json');
+  toast('Catalogue exporté (.json).');
+};
+
+/* ---------- Export CSV compatible Goodreads ---------- */
+function fmtDate(ts){ if(!ts) return ''; const d=new Date(ts); return isNaN(d)?'':`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
+$('exportCsvBtn').onclick = ()=>{
+  const cols=['Title','Author','ISBN','ISBN13','My Rating','Publisher','Number of Pages','Year Published','Date Added','Bookshelves','Exclusive Shelf','My Review'];
+  const q = v => { v=String(v??''); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  const gr = isbn => isbn ? '="'+isbn+'"' : '';   // format anti-Excel de Goodreads
+  const lines=[cols.join(',')];
+  for(const b of state.books){
+    const isbn13 = (b.isbn||'').length===13 ? b.isbn : '';
+    const isbn10 = (b.isbn||'').length===10 ? b.isbn : '';
+    lines.push([
+      q(b.title), q((b.authors||[])[0]||''), q(gr(isbn10)), q(gr(isbn13)),
+      q(b.rating||0), q(b.publisher), q(b.pages||''), q(b.year),
+      q(fmtDate(b.added)), q(b.gShelves||''), q(b.exclusiveShelf||'to-read'), q(b.review||'')
+    ].join(','));
+  }
+  download('\ufeff'+lines.join('\n'), 'ma-bibliotheque-goodreads.csv', 'text/csv;charset=utf-8');
+  toast('Exporté au format Goodreads (.csv).');
+};
+
+/* ---------- Parseur CSV (RFC-4180 : gère guillemets, virgules et retours à la ligne dans les cellules) ---------- */
+function parseCSV(text){
+  text = text.replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const rows=[]; let row=[], f='', q=false, i=0;
+  while(i<text.length){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){ f+='"'; i+=2; continue; } q=false; i++; continue; }
+      f+=c; i++; continue;
+    }
+    if(c==='"'){ q=true; i++; continue; }
+    if(c===','){ row.push(f); f=''; i++; continue; }
+    if(c==='\n'){ row.push(f); rows.push(row); row=[]; f=''; i++; continue; }
+    f+=c; i++;
+  }
+  if(f!=='' || row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+
+/* ---------- Goodreads CSV → livres normalisés ---------- */
+const SHELF_FR = { 'read':'Lus', 'to-read':'À lire', 'currently-reading':'En cours de lecture' };
+function mapGoodreads(rows){
+  const head = rows[0].map(h=>h.trim());
+  const idx = name => head.indexOf(name);
+  const iTitle=idx('Title'), iAuth=idx('Author'), iAdd=idx('Additional Authors'),
+        iIsbn=idx('ISBN'), iIsbn13=idx('ISBN13'), iRate=idx('My Rating'),
+        iPub=idx('Publisher'), iPages=idx('Number of Pages'), iYear=idx('Year Published'),
+        iOrig=idx('Original Publication Year'), iDate=idx('Date Added'),
+        iShelves=idx('Bookshelves'), iExcl=idx('Exclusive Shelf'), iRev=idx('My Review');
+  const out=[];
+  for(let r=1;r<rows.length;r++){
+    const c = rows[r]; if(!c || c.length<2 || !(c[iTitle]||'').trim()) continue;
+    const isbn = cleanISBN(c[iIsbn13]) || cleanISBN(c[iIsbn]) || '';
+    const authors = [ (c[iAuth]||'').trim(), ...String(c[iAdd]||'').split(',').map(s=>s.trim()) ].filter(Boolean);
+    const rating = Math.round(parseFloat(c[iRate])||0) || 0;
+    const excl = (c[iExcl]||'').trim() || 'to-read';
+    out.push({
+      isbn,
+      title: (c[iTitle]||'').trim(),
+      authors,
+      publisher: (c[iPub]||'').trim(),
+      year: (c[iYear]||'').trim() || (c[iOrig]||'').trim(),
+      pages: parseInt(c[iPages])||0,
+      cover: isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg` : '',
+      subjects: [],
+      rating,
+      review: (c[iRev]||'').trim(),
+      exclusiveShelf: excl,
+      gShelves: (c[iShelves]||'').trim(),
+      added: Date.parse((c[iDate]||'').replace(/\//g,'-')) || Date.now()
+    });
+  }
+  return out;
+}
+
+/* ---------- Placement automatique sur des étagères ---------- */
+const PER_SHELF = 24, MAX_SHELVES = 12;      // ~24 livres par étagère de 90 cm
+function autoOrganize(books, mode){
+  const groups = new Map();
+  if(mode==='byShelf'){
+    for(const b of books){
+      const key = SHELF_FR[b.exclusiveShelf] || 'Divers';
+      (groups.get(key) || groups.set(key,[]).get(key)).push(b);
+    }
+  } else {
+    groups.set('Import Goodreads', books.slice());
+  }
+  const order = ['En cours de lecture','À lire','Lus','Divers','Import Goodreads'];
+  const cases=[];
+  [...groups.entries()].sort((a,b)=>order.indexOf(a[0])-order.indexOf(b[0])).forEach(([name,list])=>{
+    const perCase = PER_SHELF*MAX_SHELVES;
+    for(let off=0, part=1; off<list.length; off+=perCase, part++){
+      const slice = list.slice(off, off+perCase);
+      const shelves = Math.max(1, Math.min(MAX_SHELVES, Math.ceil(slice.length/PER_SHELF)));
+      const bc = { id:uid(), name: name + (list.length>perCase?` · ${part}`:''), shelves, width:90 };
+      slice.forEach((b,k)=>{ b.bookcaseId=bc.id; b.shelf=Math.min(shelves-1, Math.floor(k/PER_SHELF)); });
+      cases.push(bc);
+    }
+  });
+  return cases;
+}
+
+/* ---------- Déclenchement import ---------- */
+$('importBtn').onclick = ()=> $('importFile').click();
+$('closeImport').onclick = ()=> $('importOverlay').classList.remove('show');
+$('importOverlay').onclick = e => { if(e.target.id==='importOverlay') $('importOverlay').classList.remove('show'); };
+
+$('importFile').onchange = e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = ()=>{ routeImport(rd.result, f.name); };
+  rd.readAsText(f);
+  e.target.value='';
+};
+
+function routeImport(text, name){
+  const looksCsv = /\.csv$/i.test(name) || (!text.trim().startsWith('{') && /(^|\n)"?(Book Id|Title),/.test(text));
+  if(looksCsv){
+    let rows;
+    try { rows = parseCSV(text); } catch(err){ return toast('CSV illisible.'); }
+    const isGoodreads = rows[0] && rows[0].map(h=>h.trim()).includes('Exclusive Shelf');
+    const books = mapGoodreads(rows);
+    if(!books.length) return toast('Aucun livre trouvé dans ce CSV.');
+    openImport(books, isGoodreads);
+  } else {
+    try{
+      const d = JSON.parse(text);
+      if(!d.books || !d.bookcases) throw 0;
+      state = d; selectedId=null; closeCard(); rebuild(true);
+      toast('Catalogue importé ('+d.books.length+' volumes).');
+    }catch(err){ toast('Fichier .json invalide.'); }
+  }
+}
+
+/* ---------- Fenêtre de confirmation d'import (CSV) ---------- */
+function openImport(books, isGoodreads){
+  // dédoublonnage vis-à-vis du catalogue existant
+  const haveIsbn = new Set(state.books.filter(b=>b.isbn).map(b=>b.isbn));
+  const haveKey  = new Set(state.books.map(b=>(b.title+'|'+(b.authors||[])[0]).toLowerCase()));
+  const fresh = books.filter(b=>{
+    if(b.isbn) return !haveIsbn.has(b.isbn);
+    return !haveKey.has((b.title+'|'+(b.authors||[])[0]).toLowerCase());
+  });
+  const dupes = books.length - fresh.length;
+  const counts = {};
+  fresh.forEach(b=>{ const k=SHELF_FR[b.exclusiveShelf]||'Divers'; counts[k]=(counts[k]||0)+1; });
+  const breakdown = Object.entries(counts).map(([k,v])=>`${v} ${k.toLowerCase()}`).join(' · ');
+
+  $('importOverlay').classList.add('show');
+  $('importBody').innerHTML = `
+    <div class="sheet-note" style="text-align:left; padding:0 0 4px">
+      <strong style="color:var(--text)">${fresh.length} livre${fresh.length>1?'s':''}</strong> ${isGoodreads?'détectés au format Goodreads':'à importer'}.
+      ${dupes?`<br><span style="color:var(--muted)">${dupes} doublon${dupes>1?'s':''} déjà au catalogue (ignoré${dupes>1?'s':''}).</span>`:''}
+      ${breakdown?`<br><span style="color:var(--muted)">${breakdown}.</span>`:''}
+    </div>
+    <label>Ranger les livres importés</label>
+    <select id="orgMode">
+      <option value="byShelf">Une bibliothèque par rayon Goodreads (Lus, À lire, En cours…)</option>
+      <option value="single">Tout dans une seule bibliothèque « Import Goodreads »</option>
+    </select>
+    <label>Couvertures &amp; sujets</label>
+    <div class="sheet-note" style="text-align:left; padding:0">Les couvertures se chargent depuis les ISBN. Pas d’appel API massif : le titre, l’auteur, la note et l’avis viennent directement du CSV.</div>
+    <div class="acts">
+      <button id="impCancel">Annuler</button>
+      <button class="ok" id="impGo" ${fresh.length?'':'disabled'}>Importer ${fresh.length} livre${fresh.length>1?'s':''}</button>
+    </div>`;
+  $('impCancel').onclick = ()=> $('importOverlay').classList.remove('show');
+  $('impGo').onclick = ()=>{
+    const mode = $('orgMode').value;
+    const cases = autoOrganize(fresh, mode);
+    fresh.forEach(b=>{ b.id=uid(); b.spineColor=spineColor(b.title+b.isbn); });
+    state.bookcases.push(...cases);
+    state.books.push(...fresh);
+    $('importOverlay').classList.remove('show');
+    selectedId=null; closeCard(); rebuild(true);
+    toast(`${fresh.length} livres importés${dupes?`, ${dupes} doublon${dupes>1?'s':''} ignoré${dupes>1?'s':''}`:''}.`);
+  };
+}
+
+let toastT;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function esc(s){ return String(s??'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+/* ============================================================
+   DÉMARRAGE
+   ============================================================ */
+initThree();
+</script>
+</body>
+</html>
