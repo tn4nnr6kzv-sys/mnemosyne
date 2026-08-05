@@ -250,6 +250,69 @@
   #install-hint .box{background:var(--paper-2);border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:11px;padding:12px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:12px;align-items:center;justify-content:space-between}
   #install-hint button{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:20px;padding:0 4px}
 
+  /* ---------- Sync ---------- */
+  .icon-btn{position:relative}
+  .dot-badge{position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:var(--brass-l);border:2px solid var(--forest);display:none}
+  .dot-badge.on{display:block}
+  .dot-badge.err{background:#e08a7a}
+  .modal.sync{max-width:560px}
+  .sync-body{padding:14px 22px 20px;display:flex;flex-direction:column;gap:14px}
+  .sync-intro{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0}
+  .sync-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:520px){.sync-grid{grid-template-columns:1fr}}
+  .sync-status{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-soft);
+    background:var(--paper-3);border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+  .sync-status .led{width:9px;height:9px;border-radius:50%;background:var(--ink-faint);flex-shrink:0}
+  .sync-status.ok .led{background:var(--forest-l)}
+  .sync-status.busy .led{background:var(--brass)}
+  .sync-status.err .led{background:#c0604f}
+  .toggle{display:flex;align-items:center;gap:11px;cursor:pointer;font-size:14px;color:var(--ink);user-select:none}
+  .toggle input{position:absolute;opacity:0;width:0;height:0}
+  .toggle .track{width:42px;height:24px;border-radius:999px;background:#cbc2a8;position:relative;transition:.18s;flex-shrink:0}
+  .toggle .track::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .toggle input:checked + .track{background:var(--forest-l)}
+  .toggle input:checked + .track::after{transform:translateX(18px)}
+  .toggle input:focus-visible + .track{box-shadow:0 0 0 3px rgba(53,107,84,.3)}
+  details.help{border:1px solid var(--line);border-radius:11px;background:var(--paper);padding:0 14px}
+  details.help summary{cursor:pointer;padding:12px 0;font-size:13.5px;font-weight:600;color:var(--forest);list-style:none}
+  details.help summary::-webkit-details-marker{display:none}
+  details.help summary::before{content:"＋ ";color:var(--brass-d)}
+  details.help[open] summary::before{content:"− "}
+  details.help ol{margin:0 0 12px;padding-left:20px;font-size:13px;color:var(--ink-soft);line-height:1.6}
+  details.help code{background:var(--paper-3);padding:1px 5px;border-radius:4px;font-size:12px}
+  .pw-wrap{position:relative}
+  .pw-wrap button.reveal{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;font-family:var(--mono)}
+
+  /* ---------- Tags ---------- */
+  .tagbar{display:flex;gap:7px;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding:12px 0 2px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .tagbar::-webkit-scrollbar{height:5px}
+  .tagbar::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .tag-lead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);flex-shrink:0;padding-right:2px}
+  .tagchip{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper-2);
+    color:var(--ink-soft);padding:6px 11px;border-radius:999px;font-size:13px;cursor:pointer;font-weight:500;white-space:nowrap;transition:.14s}
+  .tagchip:hover{border-color:var(--forest-l)}
+  .tagchip.on{background:var(--forest);color:var(--paper);border-color:var(--forest)}
+  .tagchip .tdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .tagchip .tn{font-family:var(--mono);font-size:10px;color:var(--ink-faint)}
+  .tagchip.on .tn{color:var(--brass-l)}
+  .tagchip.manage,.tagchip.clear{color:var(--brass-d);border-style:dashed}
+  .tagchip.manage:hover,.tagchip.clear:hover{background:var(--paper-3)}
+  .tag-suggest-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .mini-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);
+    padding:4px 9px;border-radius:999px;font-size:12px;cursor:pointer;transition:.14s}
+  .mini-tag:hover{border-color:var(--forest-l);background:var(--paper-3)}
+  .mini-tag .tdot{width:7px;height:7px;border-radius:50%}
+  .tag-mgr{display:flex;flex-direction:column;gap:8px}
+  .tag-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;padding:9px 11px;background:var(--paper)}
+  .tag-row .tdot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+  .tag-row .tag-name{flex:1;min-width:0;border:none;background:transparent;font-size:15px;color:var(--ink);padding:4px 2px;font-family:var(--serif)}
+  .tag-row .tag-name:focus{outline:none;border-bottom:1.5px solid var(--forest-l)}
+  .tag-row .tag-count{font-family:var(--mono);font-size:11px;color:var(--ink-faint);flex-shrink:0}
+  .tag-row .tag-act{background:none;border:1px solid var(--line);border-radius:8px;width:32px;height:32px;display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);flex-shrink:0}
+  .tag-row .tag-act:hover{border-color:var(--forest-l);background:var(--paper-3)}
+  .tag-row .tag-act.del:hover{border-color:#d9b8b1;color:var(--red)}
+  .tag-row .tag-act svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+
   .hidden{display:none!important}
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
   a{color:var(--forest-l)}
@@ -265,6 +328,10 @@
         <span class="ver" id="ver-tag"></span>
       </div>
       <div class="head-actions">
+        <button class="icon-btn" id="btn-sync" title="Synchronisation multi-appareils" aria-label="Synchronisation">
+          <svg viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 0 0 .5-8.98A6 6 0 0 0 6.2 9.2 4 4 0 0 0 7 17h2"/><path d="M12 12v7"/><path d="M9 16l3 3 3-3"/></svg>
+          <span class="dot-badge" id="sync-badge"></span>
+        </button>
         <button class="icon-btn" id="btn-data" title="Données · import / export" aria-label="Données">
           <svg viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
         </button>
@@ -283,7 +350,7 @@
   <div class="toolbar">
     <div class="search-wrap">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="search" type="search" placeholder="Chercher un titre, un auteur, une étagère…" autocomplete="off" spellcheck="false">
+      <input id="search" type="search" placeholder="Chercher un titre, un auteur, un tag…" autocomplete="off" spellcheck="false">
     </div>
     <div class="filters">
       <div class="chips" id="chips"></div>
@@ -298,6 +365,7 @@
         </select>
       </div>
     </div>
+    <div class="tagbar hidden" id="tagbar"></div>
   </div>
 
   <div class="ledger" id="ledger"></div>
@@ -356,7 +424,11 @@
         <div class="field"><label>Ajouté le</label><input id="f-dateadded" type="date"></div>
         <div class="field"><label>Lu le</label><input id="f-dateread" type="date"></div>
       </div>
-      <div class="field"><label>Étagères / tags <span style="text-transform:none;letter-spacing:0">(séparés par des virgules)</span></label><input id="f-shelves" type="text" placeholder="essai, droit, favoris…"></div>
+      <div class="field"><label>Tags <span style="text-transform:none;letter-spacing:0">(genre, type… séparés par des virgules)</span></label>
+        <input id="f-shelves" type="text" placeholder="roman, essai, droit, favoris…" list="tag-suggest" autocomplete="off">
+        <datalist id="tag-suggest"></datalist>
+        <div class="tag-suggest-chips" id="f-tagchips"></div>
+      </div>
       <div class="field"><label>Mon avis</label><textarea id="f-review" placeholder="Notes de lecture…"></textarea></div>
       <div class="field"><label>Notes privées</label><textarea id="f-notes" placeholder="Mémo personnel…"></textarea></div>
     </div>
@@ -407,6 +479,79 @@
   </div>
 </div>
 
+<!-- Sync modal -->
+<div class="scrim" id="sync-scrim" role="dialog" aria-modal="true" aria-labelledby="sync-title">
+  <div class="modal sync">
+    <button class="modal-x" data-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="data-head">
+      <span class="k">Multi-appareils</span>
+      <h2 id="sync-title">Synchronisation</h2>
+    </div>
+    <div class="sync-body">
+      <p class="sync-intro">Ta bibliothèque est enregistrée dans un fichier <code>.json</code> d'un dépôt GitHub <b>privé</b> à toi. Chaque appareil le lit et l'écrit avec un jeton d'accès. Le jeton reste <b>uniquement sur cet appareil</b> et n'est envoyé qu'à GitHub.</p>
+
+      <div class="field">
+        <label>Jeton d'accès (fine-grained)</label>
+        <div class="pw-wrap">
+          <input id="s-token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+          <button type="button" class="reveal" id="s-reveal">voir</button>
+        </div>
+      </div>
+      <div class="sync-grid">
+        <div class="field"><label>Propriétaire (ton pseudo)</label><input id="s-owner" type="text" placeholder="mon-pseudo" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label>Dépôt (privé)</label><input id="s-repo" type="text" placeholder="mnemosyne-data" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label>Fichier</label><input id="s-path" type="text" placeholder="mnemosyne.json" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label>Branche</label><input id="s-branch" type="text" placeholder="main" autocomplete="off" spellcheck="false"></div>
+      </div>
+      <div class="row" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" id="s-test">Tester la connexion</button>
+        <button class="btn ghost" id="s-save">Enregistrer</button>
+      </div>
+
+      <div class="sync-status" id="s-status"><span class="led"></span><span id="s-status-text">Non configuré.</span></div>
+
+      <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn brass" id="s-push"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Envoyer</button>
+        <button class="btn" id="s-pull"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Récupérer</button>
+        <select id="s-pullmode" aria-label="Mode de récupération" style="border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:9px 10px">
+          <option value="merge">Fusionner</option>
+          <option value="replace">Remplacer le local</option>
+        </select>
+      </div>
+
+      <label class="toggle"><input type="checkbox" id="s-auto"><span class="track"></span><span>Synchroniser automatiquement (au lancement et après chaque modification)</span></label>
+
+      <details class="help">
+        <summary>Comment créer le dépôt et le jeton (une seule fois)</summary>
+        <ol>
+          <li>Crée un dépôt <b>privé</b> sur GitHub, ex. <code>mnemosyne-data</code> (vide, sans README).</li>
+          <li>github.com → photo de profil → <b>Settings</b> → tout en bas <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>
+          <li><i>Repository access</i> : <b>Only select repositories</b> → choisis <code>mnemosyne-data</code>.</li>
+          <li><i>Permissions</i> → <b>Repository permissions</b> → <b>Contents</b> : <b>Read and write</b>.</li>
+          <li><b>Generate token</b>, copie-le (il commence par <code>github_pat_</code>) et colle-le ci-dessus. Renseigne ton pseudo et le nom du dépôt, puis <b>Enregistrer</b> et <b>Envoyer</b> une première fois.</li>
+          <li>Sur un autre appareil : mêmes réglages + même jeton (ou un second jeton), puis <b>Récupérer</b>.</li>
+        </ol>
+      </details>
+      <p class="sync-intro" style="font-size:12px">Modèle « dernier qui écrit gagne » : si tu modifies sur deux appareils sans synchroniser entre-temps, la dernière écriture prime. Chaque envoi crée un commit daté (donc un historique de sauvegardes).</p>
+    </div>
+  </div>
+</div>
+
+<!-- Tag manager modal -->
+<div class="scrim" id="tag-scrim" role="dialog" aria-modal="true" aria-labelledby="tag-title">
+  <div class="modal data">
+    <button class="modal-x" data-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="data-head">
+      <span class="k">Classement</span>
+      <h2 id="tag-title">Gérer les tags</h2>
+    </div>
+    <div class="data-body">
+      <p class="sync-intro">Renomme, fusionne (renomme un tag avec le nom d'un autre) ou supprime tes tags : la modification s'applique à <b>tous les livres concernés</b> et se synchronise. Un tag se crée en l'ajoutant à un livre, dans le champ « Tags » de sa fiche.</p>
+      <div id="tag-list" class="tag-mgr"></div>
+    </div>
+  </div>
+</div>
+
 <input type="file" id="file-csv" accept=".csv,text/csv" class="hidden">
 <input type="file" id="file-json" accept=".json,application/json" class="hidden">
 <div id="toast" role="status" aria-live="polite"></div>
@@ -420,7 +565,7 @@
    Versionnage : MAJEURE.MINEURE.PATCH (les majeures ont un nom).
    ============================================================ */
 const APP_NAME="Mnémosyne";
-const APP_VERSION="1.0.0";
+const APP_VERSION="1.2.0";
 const APP_CODENAME="Clio";   // nom de la version majeure courante
 
 /* ---------- IndexedDB ---------- */
@@ -454,7 +599,7 @@ function dbBulk(list){
 
 /* ---------- State ---------- */
 let BOOKS=[];
-let filter={q:"",shelf:"all",sort:"added"};
+let filter={q:"",shelf:"all",tags:[],sort:"added"};
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():'x'+Date.now()+Math.random().toString(16).slice(2));
 
 const SHELVES={
@@ -473,6 +618,43 @@ function toast(msg){const t=$("#toast");t.innerHTML=msg;t.classList.add("show");
 // deterministic cloth color for placeholder covers
 const CLOTH=["#2C5545","#7C3B34","#3C4C63","#6a5570","#5b6b3a","#8a6a2e","#334b4b","#7a3f52"];
 function clothColor(str){let h=0;str=str||"?";for(let i=0;i<str.length;i++){h=(h*31+str.charCodeAt(i))>>>0;}return CLOTH[h%CLOTH.length];}
+
+// tags (stored per book in the `shelves` array; free-form)
+const TAG_COLORS=["#2C5545","#8a6a2e","#3C4C63","#6a5570","#5b6b3a","#7C3B34","#334b4b","#7a3f52","#4a5c3a","#664e6e"];
+function tagColor(name){let h=0;name=name||"?";for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;return TAG_COLORS[h%TAG_COLORS.length];}
+function dedupCI(arr){const seen=new Set(),out=[];for(const t of arr){const k=t.toLowerCase();if(k&&!seen.has(k)){seen.add(k);out.push(t);}}return out;}
+function allTags(){
+  const m=new Map();
+  for(const b of BOOKS)for(const t of (b.shelves||[])){
+    const k=(t||"").toLowerCase();if(!k)continue;
+    if(m.has(k))m.get(k).count++;else m.set(k,{name:t,count:1});
+  }
+  return m;
+}
+function tagList(){return[...allTags().values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,"fr"));}
+async function applyTagChange(fn){
+  const changed=[];
+  for(const b of BOOKS){
+    const before=b.shelves||[];
+    const after=fn(before.slice(),b);
+    const diff=after.length!==before.length||after.some((v,i)=>v!==before[i]);
+    if(diff){b.shelves=after;b.updatedAt=Date.now();changed.push(b);}
+  }
+  if(changed.length)await dbBulk(changed);
+  return changed.length;
+}
+async function renameTag(oldName,newName){
+  const ci=s=>s.toLowerCase();
+  const n=await applyTagChange(arr=>dedupCI(arr.map(t=>ci(t)===ci(oldName)?newName:t)));
+  const i=filter.tags.findIndex(x=>ci(x)===ci(oldName));if(i>=0)filter.tags[i]=newName;
+  return n;
+}
+async function deleteTag(name){
+  const ci=s=>s.toLowerCase();
+  const n=await applyTagChange(arr=>arr.filter(t=>ci(t)!==ci(name)));
+  filter.tags=filter.tags.filter(x=>ci(x)!==ci(name));
+  return n;
+}
 
 function isbnClean(v){return (v||"").replace(/[="\s]/g,"").trim();}
 function toISODate(s){
@@ -609,6 +791,10 @@ function starRow(n){
 function visibleBooks(){
   let list=BOOKS.slice();
   if(filter.shelf!=="all")list=list.filter(b=>b.exclusiveShelf===filter.shelf);
+  if(filter.tags.length){
+    const want=filter.tags.map(t=>t.toLowerCase());
+    list=list.filter(b=>{const have=new Set((b.shelves||[]).map(x=>x.toLowerCase()));return want.every(w=>have.has(w));});
+  }
   const q=filter.q.trim().toLowerCase();
   if(q){
     list=list.filter(b=>
@@ -643,8 +829,23 @@ function coverHTML(b){
   return `<div class="cover"><img loading="lazy" src="${url}" alt="" 
      onerror="this.parentNode.outerHTML=this.dataset.ph" data-ph='${esc(ph).replace(/'/g,"&#39;")}'></div>`;
 }
+function renderTagbar(){
+  const el=$("#tagbar");if(!el)return;
+  const tags=tagList();
+  if(!tags.length&&!filter.tags.length){el.classList.add("hidden");el.innerHTML="";return;}
+  el.classList.remove("hidden");
+  const sel=new Set(filter.tags.map(t=>t.toLowerCase()));
+  let html='<span class="tag-lead">Tags</span>';
+  html+=tags.map(t=>{
+    const on=sel.has(t.name.toLowerCase());
+    return `<button class="tagchip${on?' on':''}" data-tag="${esc(t.name)}"><span class="tdot" style="background:${tagColor(t.name)}"></span>${esc(t.name)}<span class="tn">${t.count}</span></button>`;
+  }).join("");
+  if(filter.tags.length)html+='<button class="tagchip clear" data-clear="1">✕ effacer</button>';
+  html+='<button class="tagchip manage" data-manage="1">⚙ Gérer</button>';
+  el.innerHTML=html;
+}
 function render(){
-  renderLedger();renderChips();
+  renderLedger();renderChips();renderTagbar();
   const list=visibleBooks();
   const grid=$("#grid"),empty=$("#empty");
   if(!BOOKS.length){grid.innerHTML="";empty.classList.remove("hidden");return;}
@@ -661,6 +862,27 @@ function render(){
       </div>
     </button>`;
   }).join("");
+}
+
+/* ---------- Tag field & manager ---------- */
+function renderTagField(){
+  const tags=tagList();
+  $("#tag-suggest").innerHTML=tags.map(t=>`<option value="${esc(t.name)}"></option>`).join("");
+  $("#f-tagchips").innerHTML=tags.slice(0,14).map(t=>
+    `<button type="button" class="mini-tag" data-tag="${esc(t.name)}"><span class="tdot" style="background:${tagColor(t.name)}"></span>${esc(t.name)}</button>`).join("");
+}
+function openTagManager(){renderTagManager();openScrim("#tag-scrim");}
+function renderTagManager(){
+  const el=$("#tag-list");const tags=tagList();
+  if(!tags.length){el.innerHTML='<p style="color:var(--ink-soft);font-size:14px;margin:4px 0">Aucun tag pour l\'instant. Ajoute-en depuis la fiche d\'un livre (champ « Tags »).</p>';return;}
+  el.innerHTML=tags.map(t=>`
+    <div class="tag-row" data-tag="${esc(t.name)}">
+      <span class="tdot" style="background:${tagColor(t.name)}"></span>
+      <input class="tag-name" value="${esc(t.name)}" aria-label="Nom du tag" autocomplete="off" spellcheck="false">
+      <span class="tag-count">${t.count} livre${t.count>1?'s':''}</span>
+      <button class="tag-act filter" data-act="filter" title="Filtrer sur ce tag"><svg viewBox="0 0 24 24"><path d="M4 5h16l-6 8v5l-4 2v-7z"/></svg></button>
+      <button class="tag-act del" data-act="del" title="Supprimer ce tag"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+    </div>`).join("");
 }
 
 /* ---------- Book modal ---------- */
@@ -690,6 +912,7 @@ function openBook(id){
   $("#f-dateadded").value=b?(b.dateAdded||""):new Date().toISOString().slice(0,10);
   $("#f-dateread").value=b?(b.dateRead||""):"";
   $("#f-shelves").value=b?(b.shelves||[]).join(", "):"";
+  renderTagField();
   $("#f-review").value=b?(b.review||""):"";
   $("#f-notes").value=b?(b.privateNotes||""):"";
   $("#bk-delete").style.display=b?"":"none";
@@ -723,6 +946,7 @@ async function saveBook(){
   if(i>=0)BOOKS[i]=b;else BOOKS.push(b);
   closeScrim();render();
   toast(editing?"Fiche mise à jour.":"Livre ajouté.");
+  scheduleAutoPush();
 }
 async function deleteBook(){
   if(!editing)return;
@@ -731,6 +955,7 @@ async function deleteBook(){
   await dbDel(editing);
   BOOKS=BOOKS.filter(x=>x.id!==editing);
   closeScrim();render();toast("Livre supprimé.");
+  scheduleAutoPush();
 }
 
 /* ---------- Scrims ---------- */
@@ -757,6 +982,7 @@ async function importCSV(file){
     render();closeScrim();
     const skipped=parsed.length-fresh.length;
     toast(`<b>${fresh.length}</b> livre${fresh.length>1?'s':''} importé${fresh.length>1?'s':''}${skipped?` · ${skipped} doublon${skipped>1?'s':''} ignoré${skipped>1?'s':''}`:""}.`);
+    scheduleAutoPush();
   }catch(e){toast("Import impossible : "+e.message);}
 }
 function exportJSON(){
@@ -784,6 +1010,7 @@ async function importJSON(file){
     BOOKS=BOOKS.concat(fresh);
     render();closeScrim();
     toast(`<b>${fresh.length}</b> livre${fresh.length>1?'s':''} restauré${fresh.length>1?'s':''}.`);
+    scheduleAutoPush();
   }catch(e){toast("Restauration impossible : "+e.message);}
 }
 function exportCSV(){
@@ -813,6 +1040,128 @@ async function wipeAll(){
   await dbClear();BOOKS=[];render();closeScrim();toast("Bibliothèque vidée.");
 }
 
+/* ---------- Synchronisation GitHub ---------- */
+const GH="https://api.github.com";
+const LS="mnemo.sync.";
+function ls(k){try{return localStorage.getItem(LS+k)||"";}catch(e){return"";}}
+function lsSet(k,v){try{localStorage.setItem(LS+k,v);}catch(e){}}
+function ghCfg(){return{token:ls("token"),owner:ls("owner").trim(),repo:ls("repo").trim(),path:(ls("path")||"mnemosyne.json").trim(),branch:(ls("branch")||"main").trim()};}
+function ghConfigured(){const c=ghCfg();return!!(c.token&&c.owner&&c.repo);}
+function ghHeaders(t){return{"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};}
+function ghPathEnc(p){return p.split("/").map(encodeURIComponent).join("/");}
+// UTF-8 safe base64
+function b64encode(str){const bytes=new TextEncoder().encode(str);let bin="";const CH=0x8000;for(let i=0;i<bytes.length;i+=CH)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));return btoa(bin);}
+function b64decode(b64){const bin=atob((b64||"").replace(/\s/g,""));const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes);}
+async function ghErr(r){try{const j=await r.json();return `${r.status} · ${j.message||r.statusText}`;}catch(e){return r.status+" "+r.statusText;}}
+async function ghGet(){
+  const c=ghCfg();if(!ghConfigured())throw new Error("Configuration incomplète.");
+  const url=`${GH}/repos/${c.owner}/${c.repo}/contents/${ghPathEnc(c.path)}?ref=${encodeURIComponent(c.branch)}`;
+  const r=await fetch(url,{headers:ghHeaders(c.token)});
+  if(r.status===404)return{empty:true};
+  if(!r.ok)throw new Error(await ghErr(r));
+  const data=await r.json();
+  let json;try{json=JSON.parse(b64decode(data.content));}catch(e){throw new Error("Le fichier distant n'est pas un JSON valide.");}
+  return{json,sha:data.sha};
+}
+async function ghPut(obj,sha,message){
+  const c=ghCfg();
+  const url=`${GH}/repos/${c.owner}/${c.repo}/contents/${ghPathEnc(c.path)}`;
+  const body={message:message||("Mnémosyne — "+new Date().toISOString()),content:b64encode(JSON.stringify(obj,null,2)),branch:c.branch};
+  if(sha)body.sha=sha;
+  const r=await fetch(url,{method:"PUT",headers:{...ghHeaders(c.token),"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error(await ghErr(r));
+  const data=await r.json();
+  return data.content&&data.content.sha;
+}
+function snapshot(){return{app:APP_NAME,version:APP_VERSION,updatedAt:new Date().toISOString(),count:BOOKS.length,books:BOOKS};}
+function mergeBooks(local,remote){
+  const map=new Map();
+  for(const b of local)if(b&&b.id)map.set(b.id,b);
+  for(const b of remote){
+    if(!b||!b.id)continue;
+    const cur=map.get(b.id);
+    if(!cur){map.set(b.id,b);continue;}
+    map.set(b.id,(b.updatedAt||0)>(cur.updatedAt||0)?b:cur);
+  }
+  return[...map.values()];
+}
+function setSyncStatus(text,cls){
+  const el=$("#s-status");if(!el)return;
+  el.className="sync-status"+(cls?" "+cls:"");
+  $("#s-status-text").textContent=text;
+}
+function updateSyncBadge(){
+  const b=$("#sync-badge");if(!b)return;
+  b.className="dot-badge"+(ls("auto")==="1"&&ghConfigured()?" on":"");
+}
+function renderSync(){
+  $("#s-token").value=ls("token");
+  $("#s-owner").value=ls("owner");
+  $("#s-repo").value=ls("repo");
+  $("#s-path").value=ls("path")||"mnemosyne.json";
+  $("#s-branch").value=ls("branch")||"main";
+  $("#s-auto").checked=ls("auto")==="1";
+  const last=ls("lastAt");
+  if(!ghConfigured())setSyncStatus("Non configuré.","");
+  else setSyncStatus(last?`Dernière synchro : ${fmtWhen(last)}`:"Configuré. Aucune synchro encore.","ok");
+  updateSyncBadge();
+}
+function fmtWhen(iso){const d=new Date(iso);if(isNaN(d))return iso;return d.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});}
+function saveSyncConfig(){
+  lsSet("token",$("#s-token").value.trim());
+  lsSet("owner",$("#s-owner").value.trim());
+  lsSet("repo",$("#s-repo").value.trim());
+  lsSet("path",$("#s-path").value.trim()||"mnemosyne.json");
+  lsSet("branch",$("#s-branch").value.trim()||"main");
+  renderSync();
+}
+async function syncTest(){
+  saveSyncConfig();
+  const c=ghCfg();
+  if(!ghConfigured()){toast("Renseigne au moins le jeton, le propriétaire et le dépôt.");return;}
+  setSyncStatus("Test en cours…","busy");
+  try{
+    const r=await fetch(`${GH}/repos/${c.owner}/${c.repo}`,{headers:ghHeaders(c.token)});
+    if(!r.ok)throw new Error(await ghErr(r));
+    const repo=await r.json();
+    if(!repo.permissions||!repo.permissions.push)throw new Error("Le jeton n'a pas les droits d'écriture (Contents: Read and write) sur ce dépôt.");
+    setSyncStatus(`Connecté à ${repo.full_name}${repo.private?" (privé)":" — attention, dépôt public"}.`,"ok");
+    toast("Connexion réussie.");
+  }catch(e){setSyncStatus("Échec : "+e.message,"err");toast("Test : "+e.message);}
+}
+async function syncPush(silent){
+  if(!ghConfigured()){if(!silent)toast("Configure d'abord la synchronisation.");return;}
+  setSyncStatus("Envoi…","busy");
+  try{
+    let sha=null,remoteNewer=false;
+    try{const cur=await ghGet();if(!cur.empty){sha=cur.sha;const rt=cur.json&&cur.json.updatedAt;if(rt&&ls("lastAt")&&rt>ls("lastAt"))remoteNewer=true;}}catch(e){}
+    if(remoteNewer&&!silent&&!confirm("La version sur GitHub est plus récente que ta dernière synchro. L'écraser avec cet appareil ?")){setSyncStatus("Envoi annulé.","ok");return;}
+    const newSha=await ghPut(snapshot(),sha,`Mnémosyne · ${BOOKS.length} livres`);
+    if(newSha)lsSet("sha",newSha);
+    lsSet("lastAt",new Date().toISOString());renderSync();
+    if(!silent)toast("Bibliothèque envoyée vers GitHub.");
+  }catch(e){setSyncStatus("Échec de l'envoi : "+e.message,"err");if(!silent)toast("Envoi impossible : "+e.message);}
+}
+async function syncPull(mode,silent){
+  if(!ghConfigured()){if(!silent)toast("Configure d'abord la synchronisation.");return;}
+  setSyncStatus("Récupération…","busy");
+  try{
+    const cur=await ghGet();
+    if(cur.empty){setSyncStatus("Aucune sauvegarde sur GitHub pour l'instant.","ok");if(!silent)toast("Rien à récupérer : envoie d'abord depuis un appareil.");return;}
+    const remoteBooks=Array.isArray(cur.json.books)?cur.json.books:[];
+    const next=mode==="replace"?remoteBooks:mergeBooks(BOOKS,remoteBooks);
+    await dbClear();await dbBulk(next);BOOKS=next;
+    lsSet("sha",cur.sha);lsSet("lastAt",new Date().toISOString());
+    render();renderSync();
+    if(!silent)toast(`Récupéré : <b>${next.length}</b> livre${next.length>1?'s':''}${mode==="merge"?" (fusion)":""}.`);
+  }catch(e){setSyncStatus("Échec de la récupération : "+e.message,"err");if(!silent)toast("Récupération impossible : "+e.message);}
+}
+let _pushT=null;
+function scheduleAutoPush(){
+  if(ls("auto")!=="1"||!ghConfigured())return;
+  clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),1600);
+}
+
 /* ---------- Events ---------- */
 function bindEvents(){
   $("#search").addEventListener("input",e=>{filter.q=e.target.value;render();});
@@ -821,12 +1170,59 @@ function bindEvents(){
     const c=e.target.closest(".chip");if(!c)return;
     filter.shelf=c.dataset.shelf;render();
   });
+  $("#tagbar").addEventListener("click",e=>{
+    const c=e.target.closest("button");if(!c)return;
+    if(c.dataset.manage){openTagManager();return;}
+    if(c.dataset.clear){filter.tags=[];render();return;}
+    const t=c.dataset.tag;if(t==null)return;
+    const k=t.toLowerCase();const i=filter.tags.findIndex(x=>x.toLowerCase()===k);
+    if(i>=0)filter.tags.splice(i,1);else filter.tags.push(t);
+    render();
+  });
+  $("#f-tagchips").addEventListener("click",e=>{
+    const b=e.target.closest(".mini-tag");if(!b)return;
+    const t=b.dataset.tag;
+    const cur=$("#f-shelves").value.split(/,\s*/).map(s=>s.trim()).filter(Boolean);
+    if(!cur.some(x=>x.toLowerCase()===t.toLowerCase())){cur.push(t);$("#f-shelves").value=cur.join(", ");}
+  });
+  $("#tag-list").addEventListener("click",async e=>{
+    const btn=e.target.closest(".tag-act");if(!btn)return;
+    const row=btn.closest(".tag-row");const name=row.dataset.tag;
+    if(btn.dataset.act==="filter"){
+      if(!filter.tags.some(x=>x.toLowerCase()===name.toLowerCase()))filter.tags.push(name);
+      closeScrim();render();toast(`Filtre : tag « ${name} ».`);
+    }else if(btn.dataset.act==="del"){
+      if(!confirm(`Supprimer le tag « ${name} » de tous les livres ? (les livres ne sont pas supprimés)`))return;
+      const n=await deleteTag(name);renderTagManager();render();scheduleAutoPush();
+      toast(`Tag « ${name} » retiré de ${n} livre${n>1?'s':''}.`);
+    }
+  });
+  $("#tag-list").addEventListener("focusout",async e=>{
+    if(!e.target.classList.contains("tag-name"))return;
+    const row=e.target.closest(".tag-row");const old=row.dataset.tag;const nv=e.target.value.trim();
+    if(!nv||nv===old){e.target.value=old;return;}
+    const n=await renameTag(old,nv);render();scheduleAutoPush();renderTagManager();
+    toast(`Renommé « ${old} » → « ${nv} » (${n} livre${n>1?'s':''}).`);
+  });
+  $("#tag-list").addEventListener("keydown",e=>{
+    if(e.key==="Enter"&&e.target.classList.contains("tag-name")){e.preventDefault();e.target.blur();}
+  });
   $("#grid").addEventListener("click",e=>{
     const b=e.target.closest(".book");if(!b)return;openBook(b.dataset.id);
   });
   $("#btn-add").addEventListener("click",()=>openBook(null));
   $("#empty-add").addEventListener("click",()=>openBook(null));
   $("#btn-data").addEventListener("click",()=>openScrim("#data-scrim"));
+  $("#btn-sync").addEventListener("click",()=>{renderSync();openScrim("#sync-scrim");});
+  $("#s-test").addEventListener("click",syncTest);
+  $("#s-save").addEventListener("click",()=>{saveSyncConfig();toast("Réglages enregistrés.");});
+  $("#s-push").addEventListener("click",()=>{saveSyncConfig();syncPush(false);});
+  $("#s-pull").addEventListener("click",()=>{saveSyncConfig();const m=$("#s-pullmode").value;
+    if(m==="replace"&&!confirm("Remplacer la bibliothèque de cet appareil par la version GitHub ? Les livres locaux non envoyés seront perdus."))return;
+    syncPull(m,false);});
+  $("#s-auto").addEventListener("change",e=>{lsSet("auto",e.target.checked?"1":"0");updateSyncBadge();
+    if(e.target.checked){toast("Synchro automatique activée.");saveSyncConfig();syncPush(true);}});
+  $("#s-reveal").addEventListener("click",()=>{const i=$("#s-token");const p=i.type==="password";i.type=p?"text":"password";$("#s-reveal").textContent=p?"masquer":"voir";});
   $("#empty-import").addEventListener("click",()=>$("#file-csv").click());
   $("#bk-save").addEventListener("click",saveBook);
   $("#bk-delete").addEventListener("click",deleteBook);
@@ -866,6 +1262,10 @@ async function boot(){
   const verEl=$("#ver-tag");if(verEl)verEl.textContent=`v${APP_VERSION} · « ${APP_CODENAME} »`;
   const aboutEl=$("#about");if(aboutEl)aboutEl.innerHTML=`<b>${APP_NAME}</b> · v${APP_VERSION} « ${APP_CODENAME} »`;
   document.title=`${APP_NAME} — ma bibliothèque`;
+  renderSync();
+  if(ls("auto")==="1"&&ghConfigured()){
+    syncPull("merge",true).then(()=>syncPush(true)).catch(()=>{});
+  }
   if("serviceWorker" in navigator){
     window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
   }

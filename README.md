@@ -63,11 +63,37 @@ Les données vivent dans le navigateur de l'appareil. iOS peut effacer le stocka
 - **Couvertures** : cherchées via `covers.openlibrary.org` à partir de l'ISBN. Sans ISBN, sans couverture connue, ou hors-ligne, une couverture « toile » colorée est générée à partir du titre.
 - **Confidentialité** : rien ne quitte l'appareil, sauf la requête d'image de couverture vers Open Library (uniquement l'ISBN).
 - **Ajouter / modifier** : bouton **+**, ou clic sur un livre. Note en cliquant les étoiles (reclique la même étoile pour remettre à zéro).
+- **Étagères et tags** : l'**étagère** (Lu / En cours / À lire) est le statut de lecture ; les **tags** (genre, type, thème… champ « Tags » de la fiche) sont libres. La barre de tags sous les filtres permet de les combiner avec l'étagère (un livre doit porter tous les tags cochés). Le bouton **⚙ Gérer** ouvre le gestionnaire pour renommer, fusionner ou supprimer un tag sur l'ensemble des livres.
 - **Tout est un seul fichier** (`index.html`) : facile à bidouiller. Le nom, les couleurs (variables CSS en haut du `<style>`) et les libellés se changent en deux minutes.
 
 ---
 
-## 6. Versionnage
+## 6. Accéder à sa bibliothèque sur tous ses appareils (synchro GitHub)
+
+Par défaut, Mnémosyne stocke tout **localement** sur chaque appareil. Pour retrouver la même bibliothèque partout, active la **synchronisation GitHub** : la bibliothèque est enregistrée dans un fichier `.json` d'un dépôt **privé** à toi, que chaque appareil lit et écrit. Aucun serveur à héberger.
+
+**Mise en place (une seule fois)**
+1. Crée un dépôt **privé** sur GitHub, par exemple `mnemosyne-data` (vide, sans README). *(C'est un dépôt distinct de celui qui héberge l'app.)*
+2. github.com → photo de profil → **Settings** → tout en bas **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
+3. *Repository access* : **Only select repositories** → choisis `mnemosyne-data`.
+4. *Permissions* → **Repository permissions** → **Contents** : **Read and write**.
+5. **Generate token**, copie-le (il commence par `github_pat_`).
+6. Dans Mnémosyne : bouton **nuage** (en haut) → colle le jeton, ton pseudo (*propriétaire*) et `mnemosyne-data` (*dépôt*) → **Enregistrer** → **Tester la connexion** → **Envoyer**. Le fichier est créé.
+
+**Sur un autre appareil**
+Ouvre l'app, bouton **nuage**, saisis les mêmes réglages + le même jeton (ou un second jeton dédié), puis **Récupérer**.
+
+**Automatique**
+Active *Synchroniser automatiquement* : récupération-fusion au lancement, et envoi après chaque modification.
+
+**À savoir**
+- Le jeton reste **sur l'appareil** (stockage local du navigateur) et n'est envoyé qu'à `api.github.com` en HTTPS. Utilise un jeton *fine-grained* limité à ce seul dépôt ; tu peux le révoquer à tout moment depuis GitHub.
+- Modèle **« dernier qui écrit gagne »** au niveau du fichier ; la récupération en mode **Fusionner** réunit les livres des deux côtés (la fiche la plus récente l'emporte). Pour propager une **suppression**, utilise **Récupérer → Remplacer** sur les autres appareils, ou envoie depuis l'appareil où tu as supprimé.
+- Chaque envoi crée un **commit daté** : tu disposes gratuitement d'un historique de sauvegardes dans le dépôt.
+
+---
+
+## 7. Versionnage
 
 Mnémosyne suit le format **MAJEURE.MINEURE.PATCH** :
 
@@ -78,13 +104,15 @@ Mnémosyne suit le format **MAJEURE.MINEURE.PATCH** :
 La version courante est affichée sous le titre et dans **Données → à propos**. Elle est définie à un seul endroit dans `index.html` :
 
 ```js
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.2.0";
 const APP_CODENAME = "Clio";
 ```
 
 Le nom du cache hors-ligne (`sw.js`) reprend le numéro de version, de sorte que chaque release remplace proprement l'ancien cache. L'historique complet est dans **`CHANGELOG.md`**.
 
-Version actuelle : **1.0.0 « Clio »** (Clio, Muse de l'Histoire).
+Version actuelle : **1.2.0 « Clio »** (Clio, Muse de l'Histoire).
+
+L'historique complet est dans **`CHANGELOG.md`**.
 
 ---
 
