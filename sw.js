@@ -1,10 +1,11 @@
 /* Mnémosyne — service worker (offline app shell)
    Le nom du cache suit la version de l'app : chaque release invalide l'ancien cache. */
-const CACHE = "mnemosyne-1.2.0";
+const CACHE = "mnemosyne-1.4.0";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./vendor/zxing.min.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-512-maskable.png",

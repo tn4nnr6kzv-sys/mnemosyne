@@ -313,6 +313,43 @@
   .tag-row .tag-act.del:hover{border-color:#d9b8b1;color:var(--red)}
   .tag-row .tag-act svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
 
+  /* ---------- Scan ---------- */
+  .head-actions{gap:7px}
+  .icon-btn{width:40px;height:40px}
+  .modal.scan{max-width:480px}
+  .scan-body{padding:14px 22px 20px;display:flex;flex-direction:column;gap:14px}
+  .scan-stage{position:relative;width:100%;aspect-ratio:4/3;background:#0d1a14;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .scan-stage video{width:100%;height:100%;object-fit:cover;display:block}
+  .scan-reticle{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+  .scan-reticle span{width:74%;height:38%;border:2px solid rgba(244,239,228,.9);border-radius:12px;box-shadow:0 0 0 2000px rgba(13,26,20,.35)}
+  .scan-reticle::after{content:"";position:absolute;width:74%;height:2px;background:var(--brass-l);box-shadow:0 0 10px var(--brass);animation:scanline 2s ease-in-out infinite}
+  @keyframes scanline{0%,100%{transform:translateY(-70px)}50%{transform:translateY(70px)}}
+  @media (prefers-reduced-motion:reduce){.scan-reticle::after{animation:none}}
+  .scan-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:var(--paper);font-size:12.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);padding:0 14px}
+  .scan-stage.error{background:var(--paper-3)}
+  .scan-stage.error video{display:none}
+  .scan-manual{display:flex;flex-direction:column;gap:8px}
+  .scan-manual .or{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);text-align:center}
+  .scan-manual-row{display:flex;gap:8px}
+  .scan-manual-row input{flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+  .scan-manual-row input:focus{outline:none;border-color:var(--forest-l);box-shadow:0 0 0 3px rgba(53,107,84,.14)}
+  .scan-busy{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--paper);background:rgba(13,26,20,.7);font-size:14px}
+  .scan-busy.on{display:flex}
+  .scan-busy .spin{width:26px;height:26px;border:3px solid rgba(244,239,228,.3);border-top-color:var(--brass);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- Profils ---------- */
+  .profile-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:0 0 2px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass-l)}
+  .profile-btn .chev{width:11px;height:11px;stroke:var(--brass-l);fill:none;stroke-width:2.6;opacity:.9}
+  .profile-btn:hover{color:var(--paper)}
+  .profile-btn:hover .chev{stroke:var(--paper)}
+  .mini-btn{background:var(--forest);color:var(--paper);border:none;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0}
+  .mini-btn:hover{background:var(--forest-d)}
+  .profile-row.active{border-color:var(--forest-l);background:var(--paper-3)}
+  .profile-row.active .tag-name{font-weight:600}
+  .prof-badge{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--forest);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:4px 7px;flex-shrink:0}
+
   .hidden{display:none!important}
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
   a{color:var(--forest-l)}
@@ -323,11 +360,14 @@
   <header class="masthead">
     <div class="masthead-row">
       <div class="brand">
-        <span class="k">Bibliothèque personnelle</span>
+        <button class="profile-btn" id="btn-profile" aria-label="Changer de bibliothèque"><span id="profile-name">Ma bibliothèque</span><svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
         <h1>Mnémosyne<span class="dot">.</span></h1>
         <span class="ver" id="ver-tag"></span>
       </div>
       <div class="head-actions">
+        <button class="icon-btn" id="btn-scan" title="Scanner un code-barres" aria-label="Scanner un code-barres">
+          <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8" stroke-width="1.4"/></svg>
+        </button>
         <button class="icon-btn" id="btn-sync" title="Synchronisation multi-appareils" aria-label="Synchronisation">
           <svg viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 0 0 .5-8.98A6 6 0 0 0 6.2 9.2 4 4 0 0 0 7 17h2"/><path d="M12 12v7"/><path d="M9 16l3 3 3-3"/></svg>
           <span class="dot-badge" id="sync-badge"></span>
@@ -378,6 +418,7 @@
       <p>Importe ton export Goodreads (fichier <code>.csv</code>) ou ajoute un premier livre à la main.</p>
       <div class="row">
         <button class="btn brass" id="empty-import">Importer depuis Goodreads</button>
+        <button class="btn ghost" id="empty-scan">Scanner un livre</button>
         <button class="btn ghost" id="empty-add">Ajouter un livre</button>
       </div>
     </div>
@@ -552,6 +593,52 @@
   </div>
 </div>
 
+<!-- Scan modal -->
+<div class="scrim" id="scan-scrim" role="dialog" aria-modal="true" aria-labelledby="scan-title">
+  <div class="modal scan">
+    <button class="modal-x" data-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="data-head">
+      <span class="k">Code-barres</span>
+      <h2 id="scan-title">Scanner un livre</h2>
+    </div>
+    <div class="scan-body">
+      <div class="scan-stage" id="scan-stage">
+        <video id="scan-video" playsinline muted></video>
+        <div class="scan-reticle"><span></span></div>
+        <div class="scan-hint" id="scan-hint">Vise le code-barres (ISBN) au dos du livre.</div>
+        <div class="scan-busy" id="scan-busy"><div class="spin"></div><span id="scan-busy-text">Recherche…</span></div>
+      </div>
+      <div class="scan-manual">
+        <span class="or">ou saisis l'ISBN</span>
+        <div class="scan-manual-row">
+          <input id="scan-isbn" type="text" inputmode="numeric" placeholder="978…" autocomplete="off" spellcheck="false">
+          <button class="btn" id="scan-go">Chercher</button>
+        </div>
+      </div>
+      <p class="sync-intro" style="font-size:12px" id="scan-note">Si le livre est déjà dans ta bibliothèque, il s'ouvre. Sinon, ses informations sont récupérées automatiquement pour l'ajouter.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Profiles modal -->
+<div class="scrim" id="profile-scrim" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+  <div class="modal data">
+    <button class="modal-x" data-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="data-head">
+      <span class="k">Comptes</span>
+      <h2 id="profile-title">Profils</h2>
+    </div>
+    <div class="data-body">
+      <p class="sync-intro">Chaque profil a sa <b>propre bibliothèque</b> et sa <b>propre synchronisation</b> GitHub — pratique pour séparer perso / pro, ou partager l'appareil. Les données restent sur cet appareil ; un profil n'est pas protégé par mot de passe.</p>
+      <div id="profile-list" class="tag-mgr"></div>
+      <div class="scan-manual-row" style="margin-top:2px">
+        <input id="new-profile" type="text" placeholder="Nouveau profil (ex. Pro)" autocomplete="off" spellcheck="false">
+        <button class="btn" id="add-profile">Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <input type="file" id="file-csv" accept=".csv,text/csv" class="hidden">
 <input type="file" id="file-json" accept=".json,application/json" class="hidden">
 <div id="toast" role="status" aria-live="polite"></div>
@@ -565,15 +652,36 @@
    Versionnage : MAJEURE.MINEURE.PATCH (les majeures ont un nom).
    ============================================================ */
 const APP_NAME="Mnémosyne";
-const APP_VERSION="1.2.0";
+const APP_VERSION="1.4.0";
 const APP_CODENAME="Clio";   // nom de la version majeure courante
 
+/* ---------- Profils (bibliothèques séparées, locales) ---------- */
+const PKEY="mnemo.profiles", AKEY="mnemo.activeProfile";
+const SYNC_KEYS=["token","owner","repo","path","branch","auto","sha","lastAt"];
+let PROFILES=[], activeProfile="default";
+function loadProfilesLS(){try{return JSON.parse(localStorage.getItem(PKEY)||"[]");}catch(e){return[];}}
+function saveProfilesLS(){try{localStorage.setItem(PKEY,JSON.stringify(PROFILES));}catch(e){}}
+function activeProfileObj(){return PROFILES.find(p=>p.id===activeProfile)||PROFILES[0]||{id:"default",name:"Ma bibliothèque"};}
+function dbNameFor(id){return id==="default"?"mnemosyne-db":"mnemosyne-db__"+id;}
+function newProfileId(){return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function initProfiles(){
+  PROFILES=loadProfilesLS();
+  if(!PROFILES.length){
+    PROFILES=[{id:"default",name:"Ma bibliothèque",createdAt:Date.now()}];
+    saveProfilesLS();
+    // migrate pre-1.4.0 sync config (non-profiled) into the default profile
+    for(const k of SYNC_KEYS){const v=localStorage.getItem("mnemo.sync."+k);if(v!=null)localStorage.setItem("mnemo.sync.default."+k,v);}
+  }
+  activeProfile=localStorage.getItem(AKEY)||PROFILES[0].id;
+  if(!PROFILES.some(p=>p.id===activeProfile))activeProfile=PROFILES[0].id;
+}
+
 /* ---------- IndexedDB ---------- */
-const DB_NAME="mnemosyne-db", STORE="books", DB_VER=1;
+const STORE="books", DB_VER=1;
 let _db=null;
 function openDB(){
   return new Promise((res,rej)=>{
-    const rq=indexedDB.open(DB_NAME,DB_VER);
+    const rq=indexedDB.open(dbNameFor(activeProfile),DB_VER);
     rq.onupgradeneeded=e=>{
       const db=e.target.result;
       if(!db.objectStoreNames.contains(STORE)){
@@ -891,7 +999,7 @@ let rateVal=0;
 function renderRate(){
   $("#f-rate").innerHTML=[1,2,3,4,5].map(i=>`<button type="button" class="${i<=rateVal?'on':''}" data-r="${i}">★</button>`).join("");
 }
-function openBook(id){
+function openBook(id,prefill){
   const b=id?BOOKS.find(x=>x.id===id):null;
   editing=id||null;
   rateVal=b?(b.myRating||0):0;
@@ -916,6 +1024,7 @@ function openBook(id){
   $("#f-review").value=b?(b.review||""):"";
   $("#f-notes").value=b?(b.privateNotes||""):"";
   $("#bk-delete").style.display=b?"":"none";
+  if(!b&&prefill)applyPrefill(prefill);
   renderRate();
   openScrim("#book-scrim");
   if(!b)setTimeout(()=>$("#f-title").focus(),80);
@@ -960,7 +1069,7 @@ async function deleteBook(){
 
 /* ---------- Scrims ---------- */
 function openScrim(sel){$(sel).classList.add("open");document.body.style.overflow="hidden";}
-function closeScrim(){$$(".scrim.open").forEach(s=>s.classList.remove("open"));document.body.style.overflow="";}
+function closeScrim(){try{stopScan();}catch(e){}$$(".scrim.open").forEach(s=>s.classList.remove("open"));document.body.style.overflow="";}
 
 /* ---------- Import / Export ---------- */
 async function importCSV(file){
@@ -1036,15 +1145,15 @@ function download(blob,name){
   setTimeout(()=>URL.revokeObjectURL(u),1500);
 }
 async function wipeAll(){
-  if(!confirm("Supprimer définitivement TOUTE la bibliothèque de cet appareil ?"))return;
-  await dbClear();BOOKS=[];render();closeScrim();toast("Bibliothèque vidée.");
+  if(!confirm(`Vider définitivement la bibliothèque du profil « ${activeProfileObj().name} » sur cet appareil ?`))return;
+  await dbClear();BOOKS=[];render();closeScrim();toast("Bibliothèque du profil vidée.");
 }
 
 /* ---------- Synchronisation GitHub ---------- */
 const GH="https://api.github.com";
-const LS="mnemo.sync.";
-function ls(k){try{return localStorage.getItem(LS+k)||"";}catch(e){return"";}}
-function lsSet(k,v){try{localStorage.setItem(LS+k,v);}catch(e){}}
+function syncPrefix(){return "mnemo.sync."+activeProfile+".";}
+function ls(k){try{return localStorage.getItem(syncPrefix()+k)||"";}catch(e){return"";}}
+function lsSet(k,v){try{localStorage.setItem(syncPrefix()+k,v);}catch(e){}}
 function ghCfg(){return{token:ls("token"),owner:ls("owner").trim(),repo:ls("repo").trim(),path:(ls("path")||"mnemosyne.json").trim(),branch:(ls("branch")||"main").trim()};}
 function ghConfigured(){const c=ghCfg();return!!(c.token&&c.owner&&c.repo);}
 function ghHeaders(t){return{"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};}
@@ -1162,6 +1271,191 @@ function scheduleAutoPush(){
   clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),1600);
 }
 
+/* ---------- Scan (code-barres → retrouver ou ajouter) ---------- */
+let _zxReader=null,_zxLoading=null,_scanActive=false,_scanLock=false;
+function loadZX(){
+  if(window.ZXing)return Promise.resolve();
+  if(_zxLoading)return _zxLoading;
+  _zxLoading=new Promise((res,rej)=>{
+    const s=document.createElement("script");
+    s.src="./vendor/zxing.min.js";
+    s.onload=()=>res();
+    s.onerror=()=>{_zxLoading=null;rej(new Error("Lecteur de code-barres indisponible."));};
+    document.head.appendChild(s);
+  });
+  return _zxLoading;
+}
+function normISBN(s){return(s||"").replace(/[^0-9Xx]/g,"").toUpperCase();}
+function validISBN(s){s=normISBN(s);return(s.length===13&&/^(978|979)/.test(s))||s.length===10;}
+function applyPrefill(p){
+  if(p.title){$("#f-title").value=p.title;$("#bk-title").textContent=p.title;}
+  if(p.author){$("#f-author").value=p.author;$("#bk-byline").textContent=p.author;}
+  if(p.pages){$("#f-pages").value=p.pages;}
+  if(p.isbn13){$("#f-isbn13").value=p.isbn13;}
+  if(p.year){$("#f-year").value=p.year;}
+  if(p.publisher){$("#f-publisher").value=p.publisher;}
+  if(p.tags&&p.tags.length){$("#f-shelves").value=p.tags.join(", ");}
+  const iv=p.isbn13||"";
+  if(iv){$("#bk-cover").innerHTML=`<img src="https://covers.openlibrary.org/b/isbn/${iv}-M.jpg?default=false" alt="" onerror="this.remove()">`;}
+  $("#bk-callno").textContent="SCAN · "+(p.isbn13||p.isbn||"");
+}
+async function openScan(){
+  $("#scan-isbn").value="";setScanBusy(false);
+  $("#scan-stage").classList.remove("error");
+  $("#scan-hint").textContent="Vise le code-barres (ISBN) au dos du livre.";
+  openScrim("#scan-scrim");
+  try{await loadZX();await startScan();}
+  catch(e){scanError(e.message||"Caméra indisponible.");}
+}
+async function startScan(){
+  const hints=new Map();
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A]);
+  hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+  _zxReader=new ZXing.BrowserMultiFormatReader(hints);
+  _scanActive=true;_scanLock=false;
+  await _zxReader.decodeFromConstraints(
+    {video:{facingMode:{ideal:"environment"}}},
+    $("#scan-video"),
+    (result)=>{if(result&&_scanActive)onScanResult(result.getText?result.getText():result.text);}
+  );
+}
+function stopScan(){
+  _scanActive=false;
+  try{if(_zxReader){_zxReader.reset();_zxReader=null;}}catch(e){}
+  try{const v=$("#scan-video");if(v&&v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}}catch(e){}
+}
+function scanError(msg){$("#scan-stage").classList.add("error");$("#scan-hint").textContent=msg+" Saisis l'ISBN ci-dessous.";}
+function setScanBusy(on,text){$("#scan-busy").classList.toggle("on",!!on);if(text)$("#scan-busy-text").textContent=text;}
+async function onScanResult(text){
+  const isbn=normISBN(text);
+  if(!validISBN(isbn)||_scanLock)return;
+  _scanLock=true;_scanActive=false;
+  if(navigator.vibrate){try{navigator.vibrate(60);}catch(e){}}
+  await handleISBN(isbn);
+}
+async function scanManual(){
+  const isbn=normISBN($("#scan-isbn").value);
+  if(!validISBN(isbn)){toast("ISBN invalide (10 ou 13 chiffres).");return;}
+  await handleISBN(isbn);
+}
+async function handleISBN(isbn){
+  const found=BOOKS.find(b=>normISBN(b.isbn13)===isbn||normISBN(b.isbn)===isbn);
+  if(found){stopScan();closeScrim();openBook(found.id);toast("Déjà dans ta bibliothèque.");return;}
+  setScanBusy(true,"Recherche des informations…");
+  let meta=null;try{meta=await fetchByISBN(isbn);}catch(e){}
+  stopScan();setScanBusy(false);closeScrim();
+  const pre=meta||{};
+  if(isbn.length===13)pre.isbn13=isbn;else pre.isbn=isbn;
+  openBook(null,pre);
+  toast(meta?"Fiche pré-remplie — vérifie puis enregistre.":"Introuvable en ligne — complète à la main.");
+}
+async function fetchByISBN(isbn){
+  try{
+    const r=await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`);
+    if(r.ok){const d=await r.json();
+      if(d.totalItems>0&&d.items&&d.items[0].volumeInfo){
+        const v=d.items[0].volumeInfo;
+        return{title:(v.title||"")+(v.subtitle?` : ${v.subtitle}`:""),author:(v.authors||[]).join(", "),
+          pages:v.pageCount||null,publisher:v.publisher||"",year:(v.publishedDate||"").slice(0,4),
+          isbn13:isbn.length===13?isbn:"",tags:(v.categories||[]).slice(0,3)};
+      }
+    }
+  }catch(e){}
+  try{
+    const r=await fetch(`https://openlibrary.org/isbn/${encodeURIComponent(isbn)}.json`);
+    if(r.ok){const d=await r.json();let author="";
+      if(d.authors&&d.authors[0]&&d.authors[0].key){
+        try{const ar=await fetch(`https://openlibrary.org${d.authors[0].key}.json`);if(ar.ok){author=(await ar.json()).name||"";}}catch(e){}
+      }
+      const ym=(d.publish_date||"").match(/\d{4}/);
+      return{title:d.title||"",author,pages:d.number_of_pages||null,publisher:(d.publishers&&d.publishers[0])||"",
+        year:ym?ym[0]:"",isbn13:isbn.length===13?isbn:""};
+    }
+  }catch(e){}
+  return null;
+}
+
+/* ---------- Profils : UI & gestion ---------- */
+function renderProfile(){const n=$("#profile-name");if(n)n.textContent=activeProfileObj().name;}
+function countBooksIn(id){
+  return new Promise(res=>{
+    let done=false;const finish=v=>{if(!done){done=true;res(v);}};
+    try{
+      const rq=indexedDB.open(dbNameFor(id),DB_VER);
+      rq.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:"id"});};
+      rq.onsuccess=e=>{const db=e.target.result;
+        try{
+          if(!db.objectStoreNames.contains(STORE)){db.close();return finish(0);}
+          const cr=db.transaction(STORE,"readonly").objectStore(STORE).count();
+          cr.onsuccess=()=>{finish(cr.result||0);db.close();};
+          cr.onerror=()=>{finish(0);db.close();};
+        }catch(err){finish(0);try{db.close();}catch(_){}}
+      };
+      rq.onerror=()=>finish(0);
+    }catch(e){finish(0);}
+  });
+}
+async function renderProfileList(){
+  const el=$("#profile-list");if(!el)return;
+  const counts={};
+  await Promise.all(PROFILES.map(async p=>{counts[p.id]=p.id===activeProfile?BOOKS.length:await countBooksIn(p.id);}));
+  el.innerHTML=PROFILES.map(p=>{
+    const act=p.id===activeProfile,c=counts[p.id]||0;
+    return `<div class="tag-row profile-row${act?' active':''}" data-id="${p.id}">
+      <span class="tdot" style="background:${act?'var(--forest-l)':'#cbc2a8'}"></span>
+      <input class="tag-name prof-name" value="${esc(p.name)}" data-id="${p.id}" autocomplete="off" spellcheck="false">
+      <span class="tag-count">${c} livre${c>1?'s':''}</span>
+      ${act?'<span class="prof-badge">actif</span>':`<button class="tag-act use" data-act="use" title="Activer ce profil"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`}
+      <button class="tag-act del" data-act="del" title="Supprimer ce profil"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+    </div>`;
+  }).join("");
+}
+function openProfiles(){renderProfileList();openScrim("#profile-scrim");}
+async function switchProfile(id){
+  if(id===activeProfile){closeScrim();return;}
+  if(!PROFILES.some(p=>p.id===id))return;
+  try{if(_db){_db.close();_db=null;}}catch(e){}
+  activeProfile=id;try{localStorage.setItem(AKEY,id);}catch(e){}
+  try{await openDB();BOOKS=await dbAll();}catch(e){BOOKS=[];toast("Stockage indisponible : "+e.message);}
+  filter={q:"",shelf:"all",tags:[],sort:"added"};
+  const s=$("#search");if(s)s.value="";const so=$("#sort");if(so)so.value="added";
+  render();renderProfile();renderSync();closeScrim();
+  toast(`Profil : ${activeProfileObj().name}`);
+  if(ls("auto")==="1"&&ghConfigured())syncPull("merge",true).then(()=>syncPush(true)).catch(()=>{});
+}
+async function createProfile(name){
+  name=(name||"").trim();
+  if(!name){toast("Donne un nom au profil.");return;}
+  if(PROFILES.some(p=>p.name.toLowerCase()===name.toLowerCase())){toast("Ce nom de profil existe déjà.");return;}
+  const p={id:newProfileId(),name,createdAt:Date.now()};
+  PROFILES.push(p);saveProfilesLS();
+  await switchProfile(p.id);
+}
+function renameProfile(id,name){
+  name=(name||"").trim();if(!name)return false;
+  if(PROFILES.some(p=>p.id!==id&&p.name.toLowerCase()===name.toLowerCase())){toast("Ce nom de profil existe déjà.");return false;}
+  const p=PROFILES.find(x=>x.id===id);if(!p)return false;
+  p.name=name;saveProfilesLS();if(id===activeProfile)renderProfile();return true;
+}
+async function deleteProfile(id){
+  if(PROFILES.length<=1){toast("Impossible de supprimer le dernier profil.");return;}
+  const p=PROFILES.find(x=>x.id===id);if(!p)return;
+  if(!confirm(`Supprimer le profil « ${p.name} » et sa bibliothèque sur cet appareil ?\n(Sa sauvegarde GitHub éventuelle n'est pas touchée.)`))return;
+  const wasActive=id===activeProfile;
+  for(const k of SYNC_KEYS){try{localStorage.removeItem("mnemo.sync."+id+"."+k);}catch(e){}}
+  if(wasActive){try{if(_db){_db.close();_db=null;}}catch(e){}}
+  try{indexedDB.deleteDatabase(dbNameFor(id));}catch(e){}
+  PROFILES=PROFILES.filter(x=>x.id!==id);saveProfilesLS();
+  if(wasActive){
+    activeProfile=PROFILES[0].id;try{localStorage.setItem(AKEY,activeProfile);}catch(e){}
+    try{await openDB();BOOKS=await dbAll();}catch(e){BOOKS=[];}
+    filter={q:"",shelf:"all",tags:[],sort:"added"};
+    const s=$("#search");if(s)s.value="";
+    render();renderProfile();renderSync();
+  }
+  renderProfileList();toast(`Profil « ${p.name} » supprimé.`);
+}
+
 /* ---------- Events ---------- */
 function bindEvents(){
   $("#search").addEventListener("input",e=>{filter.q=e.target.value;render();});
@@ -1212,6 +1506,26 @@ function bindEvents(){
   });
   $("#btn-add").addEventListener("click",()=>openBook(null));
   $("#empty-add").addEventListener("click",()=>openBook(null));
+  $("#btn-scan").addEventListener("click",openScan);
+  $("#empty-scan").addEventListener("click",openScan);
+  $("#scan-go").addEventListener("click",scanManual);
+  $("#scan-isbn").addEventListener("keydown",e=>{if(e.key==="Enter")scanManual();});
+  $("#btn-profile").addEventListener("click",openProfiles);
+  $("#add-profile").addEventListener("click",()=>{createProfile($("#new-profile").value);$("#new-profile").value="";});
+  $("#new-profile").addEventListener("keydown",e=>{if(e.key==="Enter"){createProfile($("#new-profile").value);$("#new-profile").value="";}});
+  $("#profile-list").addEventListener("click",e=>{
+    const btn=e.target.closest(".tag-act");if(!btn)return;
+    const row=btn.closest(".profile-row");const id=row.dataset.id;
+    if(btn.dataset.act==="use")switchProfile(id);
+    else if(btn.dataset.act==="del")deleteProfile(id);
+  });
+  $("#profile-list").addEventListener("focusout",e=>{
+    if(!e.target.classList.contains("prof-name"))return;
+    const id=e.target.dataset.id,p=PROFILES.find(x=>x.id===id),nv=e.target.value.trim();
+    if(!nv||(p&&nv===p.name)){if(p)e.target.value=p.name;return;}
+    if(renameProfile(id,nv))renderProfileList();else if(p)e.target.value=p.name;
+  });
+  $("#profile-list").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("prof-name"))e.target.blur();});
   $("#btn-data").addEventListener("click",()=>openScrim("#data-scrim"));
   $("#btn-sync").addEventListener("click",()=>{renderSync();openScrim("#sync-scrim");});
   $("#s-test").addEventListener("click",syncTest);
@@ -1250,6 +1564,7 @@ function bindEvents(){
 
 /* ---------- Boot ---------- */
 async function boot(){
+  initProfiles();
   try{
     await openDB();
     BOOKS=await dbAll();
@@ -1257,7 +1572,7 @@ async function boot(){
     toast("Stockage local indisponible : "+e.message);
     BOOKS=[];
   }
-  bindEvents();render();
+  bindEvents();render();renderProfile();
   // Version stamps
   const verEl=$("#ver-tag");if(verEl)verEl.textContent=`v${APP_VERSION} · « ${APP_CODENAME} »`;
   const aboutEl=$("#about");if(aboutEl)aboutEl.innerHTML=`<b>${APP_NAME}</b> · v${APP_VERSION} « ${APP_CODENAME} »`;

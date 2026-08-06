@@ -8,6 +8,35 @@ Format : **MAJEURE.MINEURE.PATCH**. Les versions majeures portent un nom (une Mu
 
 ---
 
+## 1.4.0 « Clio » — 2026-08-05
+
+### Ajouté
+- **Profils (bibliothèques séparées, locales)** : plusieurs « comptes » sur l'app, chacun avec sa **propre bibliothèque** et sa **propre configuration de synchronisation** GitHub.
+  - Le nom du profil actif s'affiche dans l'en-tête ; un clic ouvre la fenêtre **Profils** (créer, activer, renommer, supprimer, avec le nombre de livres par profil).
+  - Chaque profil utilise une **base IndexedDB distincte** (isolation complète des données sur l'appareil) et un **espace de réglages de synchro distinct** — un profil peut donc suivre son utilisateur sur ses appareils via **son propre** fichier GitHub, indépendamment des autres.
+  - Idéal pour séparer perso / pro, ou partager un appareil entre plusieurs personnes.
+- Migration transparente : l'ancienne bibliothèque et sa synchro deviennent le profil par défaut « Ma bibliothèque » ; « Vider la bibliothèque » ne concerne désormais que le profil actif.
+
+### Note
+- Un profil n'est **pas** protégé par mot de passe (les données restent lisibles sur l'appareil). Pour un verrou d'accès (PIN / Face ID) ou de vrais comptes serveur, voir les évolutions futures.
+- Le cache hors-ligne passe à `mnemosyne-1.4.0`.
+
+---
+
+## 1.3.0 « Clio » — 2026-08-05
+
+### Ajouté
+- **Scanner de code-barres** (bouton code-barres, en haut) pour **retrouver ou ajouter** un livre via son ISBN :
+  - Lecture par la **caméra arrière** (décodage EAN-13 / ISBN embarqué, hors-ligne, via ZXing), avec **saisie manuelle de l'ISBN** en repli (utile sur ordinateur ou si la caméra est indisponible).
+  - Si l'ISBN correspond à un livre déjà enregistré → sa fiche s'ouvre. Sinon → les **métadonnées** (titre, auteur, pages, éditeur, année, catégories) sont récupérées automatiquement (Google Books, puis Open Library en repli) et la fiche d'ajout est pré-remplie.
+  - Vibration légère à la lecture réussie ; couverture pré-affichée quand l'ISBN est reconnu.
+
+### Technique
+- Décodeur **ZXing** (`@zxing/library`, Apache-2.0) embarqué dans `vendor/zxing.min.js`, chargé à la demande et mis en cache pour le hors-ligne.
+- Le cache hors-ligne passe à `mnemosyne-1.3.0`.
+
+---
+
 ## 1.2.0 « Clio » — 2026-08-04
 
 ### Ajouté
