@@ -8,6 +8,23 @@ Format : **MAJEURE.MINEURE.PATCH**. Les versions majeures portent un nom (une Mu
 
 ---
 
+## 1.6.0 « Clio » — 2026-08-06
+
+### Ajouté
+- **Mise à jour de l'application** (dans **Données → Application & mises à jour**) :
+  - Détection **automatique** d'une nouvelle version : un bandeau **« Nouvelle version disponible — Actualiser »** apparaît (au lancement, et à chaque réouverture de l'app).
+  - Bouton **« Vérifier les mises à jour »** : force la recherche et installe la dernière version si disponible.
+  - Bouton **« Forcer le rafraîchissement »** : vide le cache de l'application et recharge la dernière version depuis GitHub (option radicale, utile si une version reste bloquée, notamment sur iOS). Les livres et réglages ne sont pas touchés.
+  - Affichage de la **version installée**.
+
+### Corrigé
+- Le service worker ne s'auto-active plus silencieusement : la nouvelle version « attend » et n'est appliquée que sur demande (bandeau ou bouton), ce qui évite un rechargement intempestif. Suppression d'un rechargement superflu au tout premier lancement.
+
+### Technique
+- `sw.js` : gestion d'un message `SKIP_WAITING` (activation à la demande) ; enregistrement avec `updateViaCache:"none"` pour toujours revérifier le script. Le cache hors-ligne passe à `mnemosyne-1.6.0`.
+
+---
+
 ## 1.5.0 « Clio » — 2026-08-06
 
 ### Ajouté

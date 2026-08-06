@@ -249,6 +249,10 @@
   #install-hint{display:none;max-width:1180px;margin:12px auto 0;padding:0 20px}
   #install-hint .box{background:var(--paper-2);border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:11px;padding:12px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:12px;align-items:center;justify-content:space-between}
   #install-hint button{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:20px;padding:0 4px}
+  #update-banner{max-width:1180px;margin:12px auto 0;padding:0 20px}
+  #update-banner .box{background:var(--forest);border:1px solid var(--forest-d);border-left:4px solid var(--brass);border-radius:11px;padding:11px 12px 11px 14px;font-size:13.5px;color:var(--paper);display:flex;gap:12px;align-items:center;justify-content:space-between}
+  #update-banner .box b{color:var(--brass-l)}
+  #update-banner .btn{padding:8px 14px;font-size:13.5px}
 
   /* ---------- Sync ---------- */
   .icon-btn{position:relative}
@@ -444,6 +448,11 @@
     <button id="install-x" aria-label="Fermer">×</button>
   </div></div>
 
+  <div id="update-banner" class="hidden"><div class="box">
+    <span><b>Nouvelle version disponible.</b> Actualise pour l'installer.</span>
+    <button class="btn brass" id="update-apply">Actualiser</button>
+  </div></div>
+
   <div class="toolbar">
     <div class="search-wrap">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -574,6 +583,14 @@
         <h3>Exporter au format Goodreads</h3>
         <p>Génère un <code>.csv</code> compatible (colonnes Goodreads) pour réimporter ailleurs.</p>
         <div class="row"><button class="btn ghost" id="do-export-csv">Exporter (.csv)</button></div>
+      </div>
+      <div class="data-item">
+        <h3>Application & mises à jour</h3>
+        <p id="update-line">Version installée : <b id="ver-installed">—</b>.</p>
+        <div class="row">
+          <button class="btn ghost" id="do-check-update">Vérifier les mises à jour</button>
+          <button class="btn ghost" id="do-hard-refresh">Forcer le rafraîchissement</button>
+        </div>
       </div>
       <div class="data-item" style="border-color:#e0c9c3">
         <h3 style="color:var(--red)">Tout effacer</h3>
@@ -756,7 +773,7 @@
    Versionnage : MAJEURE.MINEURE.PATCH (les majeures ont un nom).
    ============================================================ */
 const APP_NAME="Mnémosyne";
-const APP_VERSION="1.5.0";
+const APP_VERSION="1.6.0";
 const APP_CODENAME="Clio";   // nom de la version majeure courante
 
 /* ---------- Profils (bibliothèques séparées, locales) ---------- */
@@ -1831,6 +1848,9 @@ function bindEvents(){
   $("#do-export-json").addEventListener("click",exportJSON);
   $("#do-export-csv").addEventListener("click",exportCSV);
   $("#do-wipe").addEventListener("click",wipeAll);
+  $("#do-check-update").addEventListener("click",()=>checkForUpdate(true));
+  $("#do-hard-refresh").addEventListener("click",hardRefresh);
+  $("#update-apply").addEventListener("click",applyUpdate);
   $("#file-csv").addEventListener("change",e=>{const f=e.target.files[0];if(f)importCSV(f);e.target.value="";});
   $("#file-json").addEventListener("change",e=>{const f=e.target.files[0];if(f)importJSON(f);e.target.value="";});
 
@@ -1865,8 +1885,59 @@ async function boot(){
     syncPull("merge",true).then(()=>syncPush(true)).catch(()=>{});
   }
   if("serviceWorker" in navigator){
-    window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+    initSWUpdates();
   }
+}
+/* ---------- Mises à jour PWA ---------- */
+let swReg=null,_reloading=false,_updating=false;
+function initSWUpdates(){
+  const inst=$("#ver-installed");if(inst)inst.textContent=`${APP_VERSION} « ${APP_CODENAME} »`;
+  navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(reg=>{
+    swReg=reg;
+    if(reg.waiting&&navigator.serviceWorker.controller)showUpdateBanner();
+    reg.addEventListener("updatefound",()=>{
+      const nw=reg.installing;if(!nw)return;
+      nw.addEventListener("statechange",()=>{
+        if(nw.state==="installed"&&navigator.serviceWorker.controller)showUpdateBanner();
+      });
+    });
+    setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
+  }).catch(()=>{});
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(_reloading||!_updating)return;_reloading=true;location.reload();
+  });
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"&&swReg)swReg.update().catch(()=>{});
+  });
+}
+function showUpdateBanner(){const b=$("#update-banner");if(b)b.classList.remove("hidden");}
+function applyUpdate(){
+  const w=swReg&&swReg.waiting;
+  if(!w){location.reload();return;}
+  _updating=true;
+  toast("Installation de la mise à jour…");
+  w.postMessage({type:"SKIP_WAITING"});
+  setTimeout(()=>{if(!_reloading){_reloading=true;location.reload();}},3000);
+}
+async function checkForUpdate(manual){
+  if(!("serviceWorker" in navigator)){if(manual)toast("Ce navigateur ne gère pas les mises à jour hors-ligne.");return;}
+  let reg=swReg;try{reg=reg||await navigator.serviceWorker.getRegistration();}catch(e){}
+  if(!reg){if(manual&&confirm("Aucun service actif. Recharger l'application maintenant ?"))location.reload();return;}
+  if(manual)toast("Recherche d'une mise à jour…");
+  try{await reg.update();}catch(e){if(manual)toast("Vérification impossible : "+e.message);return;}
+  if(reg.waiting){showUpdateBanner();applyUpdate();return;}
+  if(reg.installing){if(manual)toast("Téléchargement de la mise à jour…");return;}
+  if(manual)toast(`Vous êtes déjà à jour (v${APP_VERSION}).`);
+}
+async function hardRefresh(){
+  if(!confirm("Forcer le rafraîchissement ?\nLe cache de l'application est vidé et la dernière version est rechargée depuis GitHub. Tes livres et réglages ne sont pas touchés."))return;
+  toast("Rafraîchissement…");
+  try{
+    if("serviceWorker" in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs)await r.unregister();}
+    if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}
+  }catch(e){}
+  _reloading=true;
+  location.reload();
 }
 boot();
 </script>
