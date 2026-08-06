@@ -332,6 +332,8 @@
   .scan-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:var(--paper);font-size:12.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);padding:0 14px}
   .scan-stage.error{background:var(--paper-3)}
   .scan-stage.error video{display:none}
+  .scan-photo{display:flex;flex-direction:column}
+  .scan-photo .btn{width:100%;justify-content:center}
   .scan-manual{display:flex;flex-direction:column;gap:8px}
   .scan-manual .or{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);text-align:center}
   .scan-manual-row{display:flex;gap:8px}
@@ -685,10 +687,14 @@
     </div>
     <div class="scan-body">
       <div class="scan-stage" id="scan-stage">
-        <video id="scan-video" playsinline muted></video>
+        <video id="scan-video" playsinline autoplay muted></video>
         <div class="scan-reticle"><span></span></div>
         <div class="scan-hint" id="scan-hint">Vise le code-barres (ISBN) au dos du livre.</div>
         <div class="scan-busy" id="scan-busy"><div class="spin"></div><span id="scan-busy-text">Recherche…</span></div>
+      </div>
+      <div class="scan-photo">
+        <button class="btn brass" id="scan-photo-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Prendre une photo du code-barres</button>
+        <input type="file" id="scan-file" accept="image/*" capture="environment" class="hidden">
       </div>
       <div class="scan-manual">
         <span class="or">ou saisis l'ISBN</span>
@@ -697,7 +703,7 @@
           <button class="btn" id="scan-go">Chercher</button>
         </div>
       </div>
-      <p class="sync-intro" style="font-size:12px" id="scan-note">Si le livre est déjà dans ta bibliothèque, il s'ouvre. Sinon, ses informations sont récupérées automatiquement pour l'ajouter.</p>
+      <p class="sync-intro" style="font-size:12px" id="scan-note">Si le livre est déjà dans ta bibliothèque, il s'ouvre. Sinon, ses informations sont récupérées automatiquement pour l'ajouter. Sur iPhone installé, la <b>photo</b> est la méthode la plus fiable.</p>
     </div>
   </div>
 </div>
@@ -717,6 +723,53 @@
         <input id="new-profile" type="text" placeholder="Nouveau profil (ex. Pro)" autocomplete="off" spellcheck="false">
         <button class="btn" id="add-profile">Créer</button>
       </div>
+      <div class="data-item" style="margin-top:6px">
+        <h3>Mes bibliothèques sur mes autres appareils</h3>
+        <p>Regroupe <b>toutes tes bibliothèques</b> (et leurs livres) dans un seul fichier GitHub, pour les retrouver à l'identique sur chaque appareil.</p>
+        <div class="row"><button class="btn brass" id="open-account">Configurer / synchroniser…</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Account (all libraries) modal -->
+<div class="scrim" id="account-scrim" role="dialog" aria-modal="true" aria-labelledby="account-title">
+  <div class="modal sync">
+    <button class="modal-x" data-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="data-head">
+      <span class="k">Multi-appareils</span>
+      <h2 id="account-title">Mes bibliothèques</h2>
+    </div>
+    <div class="sync-body">
+      <p class="sync-intro">Enregistre <b>toutes tes bibliothèques</b> et leurs livres dans un unique fichier <code>.json</code> d'un dépôt GitHub <b>privé</b>. Configure-le une fois par appareil : sur un nouvel appareil, <b>Récupérer</b> recrée toutes tes bibliothèques d'un coup. Le jeton reste sur l'appareil et n'est jamais enregistré dans le fichier.</p>
+      <div class="field">
+        <label>Jeton d'accès (fine-grained)</label>
+        <div class="pw-wrap">
+          <input id="a-token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+          <button type="button" class="reveal" id="a-reveal">voir</button>
+        </div>
+      </div>
+      <div class="sync-grid">
+        <div class="field"><label>Propriétaire (ton pseudo)</label><input id="a-owner" type="text" placeholder="mon-pseudo" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label>Dépôt (privé)</label><input id="a-repo" type="text" placeholder="mnemosyne-data" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label>Fichier</label><input id="a-path" type="text" placeholder="mnemosyne-compte.json" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label>Branche</label><input id="a-branch" type="text" placeholder="main" autocomplete="off" spellcheck="false"></div>
+      </div>
+      <div class="row" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" id="a-test">Tester la connexion</button>
+        <button class="btn ghost" id="a-save">Enregistrer</button>
+      </div>
+      <div class="sync-status" id="acct-status"><span class="led"></span><span id="acct-status-text">Non configuré.</span></div>
+      <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn brass" id="a-push"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Envoyer</button>
+        <button class="btn" id="a-pull"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Récupérer</button>
+        <select id="a-pullmode" aria-label="Mode de récupération" style="border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:9px 10px">
+          <option value="merge">Fusionner</option>
+          <option value="replace">Remplacer le local</option>
+        </select>
+      </div>
+      <label class="toggle"><input type="checkbox" id="a-auto"><span class="track"></span><span>Synchroniser le compte automatiquement (au lancement et après chaque modification)</span></label>
+      <p class="sync-intro" style="font-size:12px">À distinguer de la synchro « une bibliothèque » (bouton nuage) qui ne partage qu'une seule bibliothèque, utile pour la partager avec quelqu'un. Ici c'est <b>tout ton compte</b> qui suit tes appareils. Modèle « dernier qui écrit gagne » avec fusion par livre à la récupération.</p>
     </div>
   </div>
 </div>
@@ -773,7 +826,7 @@
    Versionnage : MAJEURE.MINEURE.PATCH (les majeures ont un nom).
    ============================================================ */
 const APP_NAME="Mnémosyne";
-const APP_VERSION="1.6.0";
+const APP_VERSION="1.7.1";
 const APP_CODENAME="Clio";   // nom de la version majeure courante
 
 /* ---------- Profils (bibliothèques séparées, locales) ---------- */
@@ -1290,8 +1343,8 @@ function ghPathEnc(p){return p.split("/").map(encodeURIComponent).join("/");}
 function b64encode(str){const bytes=new TextEncoder().encode(str);let bin="";const CH=0x8000;for(let i=0;i<bytes.length;i+=CH)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));return btoa(bin);}
 function b64decode(b64){const bin=atob((b64||"").replace(/\s/g,""));const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes);}
 async function ghErr(r){try{const j=await r.json();return `${r.status} · ${j.message||r.statusText}`;}catch(e){return r.status+" "+r.statusText;}}
-async function ghGet(){
-  const c=ghCfg();if(!ghConfigured())throw new Error("Configuration incomplète.");
+async function ghGet(c){
+  c=c||ghCfg();if(!c.token||!c.owner||!c.repo)throw new Error("Configuration incomplète.");
   const url=`${GH}/repos/${c.owner}/${c.repo}/contents/${ghPathEnc(c.path)}?ref=${encodeURIComponent(c.branch)}`;
   const r=await fetch(url,{headers:ghHeaders(c.token)});
   if(r.status===404)return{empty:true};
@@ -1300,8 +1353,8 @@ async function ghGet(){
   let json;try{json=JSON.parse(b64decode(data.content));}catch(e){throw new Error("Le fichier distant n'est pas un JSON valide.");}
   return{json,sha:data.sha};
 }
-async function ghPut(obj,sha,message){
-  const c=ghCfg();
+async function ghPut(obj,sha,message,c){
+  c=c||ghCfg();
   const url=`${GH}/repos/${c.owner}/${c.repo}/contents/${ghPathEnc(c.path)}`;
   const body={message:message||("Mnémosyne — "+new Date().toISOString()),content:b64encode(JSON.stringify(obj,null,2)),branch:c.branch};
   if(sha)body.sha=sha;
@@ -1397,7 +1450,113 @@ let _pushT=null;
 function scheduleAutoPush(){
   if(ls("auto")!=="1"||!ghConfigured())return;
   clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),1600);
+  scheduleAcctPush();
 }
+
+/* ---------- Synchronisation du COMPTE (toutes les bibliothèques dans un fichier) ---------- */
+const ALS="mnemo.acct.";
+function als(k){try{return localStorage.getItem(ALS+k)||"";}catch(e){return"";}}
+function alsSet(k,v){try{localStorage.setItem(ALS+k,v);}catch(e){}}
+function acctCfg(){return{token:als("token"),owner:als("owner").trim(),repo:als("repo").trim(),path:(als("path")||"mnemosyne-compte.json").trim(),branch:(als("branch")||"main").trim()};}
+function acctConfigured(){const c=acctCfg();return!!(c.token&&c.owner&&c.repo);}
+// lire / écrire les livres d'un profil (actif via _db, sinon connexion temporaire)
+function readBooksIn(id){
+  if(id===activeProfile&&_db)return dbAll();
+  return new Promise(res=>{
+    try{
+      const rq=indexedDB.open(dbNameFor(id),DB_VER);
+      rq.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:"id"});};
+      rq.onsuccess=e=>{const db=e.target.result;try{const r=db.transaction(STORE,"readonly").objectStore(STORE).getAll();r.onsuccess=()=>{res(r.result||[]);db.close();};r.onerror=()=>{res([]);db.close();};}catch(_){res([]);try{db.close();}catch(__){}}};
+      rq.onerror=()=>res([]);
+    }catch(e){res([]);}
+  });
+}
+function writeBooksIn(id,books,replace){
+  if(id===activeProfile&&_db)return (replace?dbClear():Promise.resolve()).then(()=>dbBulk(books));
+  return new Promise((res,rej)=>{
+    try{
+      const rq=indexedDB.open(dbNameFor(id),DB_VER);
+      rq.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:"id"});};
+      rq.onsuccess=e=>{const db=e.target.result;try{const t=db.transaction(STORE,"readwrite"),s=t.objectStore(STORE);if(replace)s.clear();for(const b of books)s.put(b);t.oncomplete=()=>{res();db.close();};t.onerror=()=>{rej(t.error);db.close();};}catch(err){rej(err);try{db.close();}catch(_){}}};
+      rq.onerror=()=>rej(rq.error);
+    }catch(e){rej(e);}
+  });
+}
+async function accountSnapshot(){
+  const data={};
+  for(const p of PROFILES)data[p.id]=await readBooksIn(p.id);
+  return{app:APP_NAME,version:APP_VERSION,type:"account",updatedAt:new Date().toISOString(),
+    profiles:PROFILES.map(p=>({id:p.id,name:p.name,createdAt:p.createdAt||Date.now()})),data};
+}
+function setAcctStatus(text,cls){const el=$("#acct-status");if(!el)return;el.className="sync-status"+(cls?" "+cls:"");$("#acct-status-text").textContent=text;}
+function renderAcct(){
+  $("#a-token").value=als("token");$("#a-owner").value=als("owner");$("#a-repo").value=als("repo");
+  $("#a-path").value=als("path")||"mnemosyne-compte.json";$("#a-branch").value=als("branch")||"main";
+  $("#a-auto").checked=als("auto")==="1";
+  const last=als("lastAt");
+  if(!acctConfigured())setAcctStatus("Non configuré.","");
+  else setAcctStatus(last?`Dernière synchro du compte : ${fmtWhen(last)}`:"Configuré. Aucune synchro encore.","ok");
+}
+function saveAcctConfig(){
+  alsSet("token",$("#a-token").value.trim());alsSet("owner",$("#a-owner").value.trim());
+  alsSet("repo",$("#a-repo").value.trim());alsSet("path",$("#a-path").value.trim()||"mnemosyne-compte.json");
+  alsSet("branch",$("#a-branch").value.trim()||"main");renderAcct();
+}
+async function accountTest(){
+  saveAcctConfig();const c=acctCfg();
+  if(!acctConfigured()){toast("Renseigne le jeton, le propriétaire et le dépôt.");return;}
+  setAcctStatus("Test en cours…","busy");
+  try{
+    const r=await fetch(`${GH}/repos/${c.owner}/${c.repo}`,{headers:ghHeaders(c.token)});
+    if(!r.ok)throw new Error(await ghErr(r));
+    const repo=await r.json();
+    if(!repo.permissions||!repo.permissions.push)throw new Error("Le jeton n'a pas les droits d'écriture sur ce dépôt.");
+    setAcctStatus(`Connecté à ${repo.full_name}${repo.private?" (privé)":" — dépôt public !"}.`,"ok");toast("Connexion réussie.");
+  }catch(e){setAcctStatus("Échec : "+e.message,"err");toast("Test : "+e.message);}
+}
+async function accountPush(silent){
+  if(!acctConfigured()){if(!silent)toast("Configure d'abord le compte.");return;}
+  setAcctStatus("Envoi du compte…","busy");
+  try{
+    const cfg=acctCfg();let sha=null,remoteNewer=false;
+    try{const cur=await ghGet(cfg);if(!cur.empty){sha=cur.sha;const rt=cur.json&&cur.json.updatedAt;if(rt&&als("lastAt")&&rt>als("lastAt"))remoteNewer=true;}}catch(e){}
+    if(remoteNewer&&!silent&&!confirm("La version du compte sur GitHub est plus récente. L'écraser avec cet appareil ?")){setAcctStatus("Envoi annulé.","ok");return;}
+    const snap=await accountSnapshot();
+    const newSha=await ghPut(snap,sha,`Mnémosyne — compte · ${PROFILES.length} bibliothèque(s)`,cfg);
+    if(newSha)alsSet("sha",newSha);alsSet("lastAt",new Date().toISOString());renderAcct();
+    if(!silent)toast("Compte envoyé (toutes les bibliothèques).");
+  }catch(e){setAcctStatus("Échec de l'envoi : "+e.message,"err");if(!silent)toast("Envoi impossible : "+e.message);}
+}
+async function accountPull(mode,silent){
+  if(!acctConfigured()){if(!silent)toast("Configure d'abord le compte.");return;}
+  setAcctStatus("Récupération du compte…","busy");
+  try{
+    const cfg=acctCfg();const cur=await ghGet(cfg);
+    if(cur.empty){setAcctStatus("Aucun compte sur GitHub.","ok");if(!silent)toast("Rien à récupérer : envoie d'abord depuis un appareil.");return;}
+    const j=cur.json;const remoteProfiles=Array.isArray(j.profiles)?j.profiles:[];const data=j.data||{};
+    let created=0;
+    for(const rp of remoteProfiles){
+      if(!rp||!rp.id)continue;
+      let lp=PROFILES.find(p=>p.id===rp.id);
+      if(!lp){lp={id:rp.id,name:rp.name||"Bibliothèque",createdAt:rp.createdAt||Date.now()};PROFILES.push(lp);created++;}
+      else if(rp.name)lp.name=rp.name;
+      const remoteBooks=Array.isArray(data[rp.id])?data[rp.id]:[];
+      if(mode==="replace")await writeBooksIn(rp.id,remoteBooks,true);
+      else{const local=await readBooksIn(rp.id);await writeBooksIn(rp.id,mergeBooks(local,remoteBooks),true);}
+    }
+    saveProfilesLS();
+    BOOKS=await dbAll();
+    alsSet("sha",cur.sha);alsSet("lastAt",new Date().toISOString());
+    render();renderProfile();renderAcct();
+    if(!silent)toast(`Bibliothèques récupérées : <b>${remoteProfiles.length}</b>${created?` (${created} nouvelle${created>1?'s':''})`:""}.`);
+  }catch(e){setAcctStatus("Échec de la récupération : "+e.message,"err");if(!silent)toast("Récupération impossible : "+e.message);}
+}
+let _acctT=null;
+function scheduleAcctPush(){
+  if(als("auto")!=="1"||!acctConfigured())return;
+  clearTimeout(_acctT);_acctT=setTimeout(()=>accountPush(true),2200);
+}
+function openAccount(){renderAcct();openScrim("#account-scrim");}
 
 /* ---------- Scan (code-barres → retrouver ou ajouter) ---------- */
 let _zxReader=null,_zxLoading=null,_scanActive=false,_scanLock=false;
@@ -1432,27 +1591,42 @@ async function openScan(){
   $("#scan-stage").classList.remove("error");
   $("#scan-hint").textContent="Vise le code-barres (ISBN) au dos du livre.";
   openScrim("#scan-scrim");
+  if(!window.isSecureContext){scanError("La caméra nécessite HTTPS.");return;}
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){scanError("Caméra en direct non disponible ici — utilise la photo.");return;}
   try{await loadZX();await startScan();}
-  catch(e){scanError(e.message||"Caméra indisponible.");}
+  catch(e){scanError(scanErrText(e));}
+}
+function zxHints(){
+  const h=new Map();
+  h.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E]);
+  h.set(ZXing.DecodeHintType.TRY_HARDER,true);
+  return h;
+}
+function scanErrText(e){
+  const n=(e&&e.name)||"",m=(e&&e.message)||"";
+  if(/NotAllowed|Permission/i.test(n+m))return "Accès à la caméra refusé.";
+  if(/NotFound|Devices/i.test(n+m))return "Aucune caméra détectée.";
+  if(/NotReadable|Track/i.test(n+m))return "La caméra est utilisée par une autre app.";
+  return "Caméra en direct indisponible.";
 }
 async function startScan(){
-  const hints=new Map();
-  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A]);
-  hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
-  _zxReader=new ZXing.BrowserMultiFormatReader(hints);
+  _zxReader=new ZXing.BrowserMultiFormatReader(zxHints());
   _scanActive=true;_scanLock=false;
+  const video=$("#scan-video");
+  video.setAttribute("playsinline","");video.setAttribute("autoplay","");video.muted=true;
   await _zxReader.decodeFromConstraints(
-    {video:{facingMode:{ideal:"environment"}}},
-    $("#scan-video"),
+    {video:{facingMode:{ideal:"environment"}},audio:false},
+    video,
     (result)=>{if(result&&_scanActive)onScanResult(result.getText?result.getText():result.text);}
   );
+  try{await video.play();}catch(e){}
 }
 function stopScan(){
   _scanActive=false;
   try{if(_zxReader){_zxReader.reset();_zxReader=null;}}catch(e){}
   try{const v=$("#scan-video");if(v&&v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}}catch(e){}
 }
-function scanError(msg){$("#scan-stage").classList.add("error");$("#scan-hint").textContent=msg+" Saisis l'ISBN ci-dessous.";}
+function scanError(msg){$("#scan-stage").classList.add("error");$("#scan-hint").textContent=msg+" Prends une photo ou saisis l'ISBN.";}
 function setScanBusy(on,text){$("#scan-busy").classList.toggle("on",!!on);if(text)$("#scan-busy-text").textContent=text;}
 async function onScanResult(text){
   const isbn=normISBN(text);
@@ -1460,6 +1634,24 @@ async function onScanResult(text){
   _scanLock=true;_scanActive=false;
   if(navigator.vibrate){try{navigator.vibrate(60);}catch(e){}}
   await handleISBN(isbn);
+}
+async function decodePhoto(file){
+  if(!file)return;
+  setScanBusy(true,"Lecture de la photo…");
+  let url=null;
+  try{
+    await loadZX();
+    url=URL.createObjectURL(file);
+    const reader=new ZXing.BrowserMultiFormatReader(zxHints());
+    const result=await reader.decodeFromImageUrl(url);
+    const isbn=normISBN(result.getText?result.getText():result.text);
+    if(!validISBN(isbn)){setScanBusy(false);toast("Code-barres lu, mais ce n'est pas un ISBN. Réessaie ou saisis-le.");return;}
+    if(navigator.vibrate){try{navigator.vibrate(60);}catch(e){}}
+    await handleISBN(isbn);
+  }catch(e){
+    setScanBusy(false);
+    toast("Code-barres non lisible sur la photo. Cadre-le bien, à plat et net — ou saisis l'ISBN.");
+  }finally{if(url)URL.revokeObjectURL(url);}
 }
 async function scanManual(){
   const isbn=normISBN($("#scan-isbn").value);
@@ -1796,7 +1988,18 @@ function bindEvents(){
   $("#empty-scan").addEventListener("click",openScan);
   $("#scan-go").addEventListener("click",scanManual);
   $("#scan-isbn").addEventListener("keydown",e=>{if(e.key==="Enter")scanManual();});
+  $("#scan-photo-btn").addEventListener("click",()=>$("#scan-file").click());
+  $("#scan-file").addEventListener("change",e=>{const f=e.target.files[0];if(f)decodePhoto(f);e.target.value="";});
   $("#btn-profile").addEventListener("click",openProfiles);
+  $("#open-account").addEventListener("click",openAccount);
+  $("#a-reveal").addEventListener("click",()=>{const i=$("#a-token");const p=i.type==="password";i.type=p?"text":"password";$("#a-reveal").textContent=p?"masquer":"voir";});
+  $("#a-test").addEventListener("click",accountTest);
+  $("#a-save").addEventListener("click",()=>{saveAcctConfig();toast("Réglages du compte enregistrés.");});
+  $("#a-push").addEventListener("click",()=>{saveAcctConfig();accountPush(false);});
+  $("#a-pull").addEventListener("click",()=>{saveAcctConfig();const m=$("#a-pullmode").value;
+    if(m==="replace"&&!confirm("Remplacer les bibliothèques de cet appareil par celles du compte GitHub ? Les livres locaux non envoyés seront perdus."))return;
+    accountPull(m,false);});
+  $("#a-auto").addEventListener("change",e=>{alsSet("auto",e.target.checked?"1":"0");if(e.target.checked){toast("Synchro du compte activée.");saveAcctConfig();accountPush(true);}});
   $("#add-profile").addEventListener("click",()=>{createProfile($("#new-profile").value);$("#new-profile").value="";});
   // Lecture : carrousel, progression, statistiques
   $("#ledger").addEventListener("click",e=>{if(e.target.closest("#stat-more"))openStats();});
@@ -1883,6 +2086,9 @@ async function boot(){
   renderSync();
   if(ls("auto")==="1"&&ghConfigured()){
     syncPull("merge",true).then(()=>syncPush(true)).catch(()=>{});
+  }
+  if(als("auto")==="1"&&acctConfigured()){
+    accountPull("merge",true).then(()=>accountPush(true)).catch(()=>{});
   }
   if("serviceWorker" in navigator){
     initSWUpdates();

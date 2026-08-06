@@ -8,6 +8,35 @@ Format : **MAJEURE.MINEURE.PATCH**. Les versions majeures portent un nom (une Mu
 
 ---
 
+## 1.7.1 « Clio » — 2026-08-06
+
+### Corrigé / fiabilisé
+- **Scanner de code-barres** rendu réellement fonctionnel, notamment en PWA iOS où la caméra en direct est capricieuse :
+  - Nouveau mode **« Prendre une photo du code-barres »** (capture native puis décodage de l'image) — méthode la plus fiable, y compris sur iPhone installé. Décodage d'une vraie image EAN-13 vérifié.
+  - Flux caméra en direct fiabilisé (attributs `playsinline`/`autoplay`/`muted`, appel `play()`, contrainte caméra arrière, formats EAN-13/EAN-8/UPC-A/UPC-E).
+  - **Messages d'erreur explicites** (accès refusé, aucune caméra, caméra occupée, contexte non sécurisé) avec repli automatique vers la photo ou la saisie manuelle.
+
+### Note
+- Le cache hors-ligne passe à `mnemosyne-1.7.1`.
+
+---
+
+## 1.7.0 « Clio » — 2026-08-06
+
+### Ajouté
+- **Synchronisation du compte (toutes les bibliothèques sur tous les appareils)** : jusqu'ici la liste des bibliothèques (profils) restait locale à chaque appareil ; il fallait les recréer une à une. Désormais un **unique fichier GitHub** (`mnemosyne-compte.json`) regroupe **toutes tes bibliothèques et leurs livres**.
+  - Accès depuis **Profils → « Configurer / synchroniser… »** : jeton, propriétaire, dépôt, fichier, branche.
+  - **Envoyer** : publie toutes les bibliothèques (profils + livres) dans le fichier de compte.
+  - **Récupérer** (Fusionner ou Remplacer) : recrée sur cet appareil **toutes** les bibliothèques du compte, avec leurs livres ; les noms et renommages se propagent. Idéal pour équiper un nouvel appareil B, C, D…
+  - **Synchro automatique** du compte optionnelle (au lancement et après chaque modification).
+  - Fusion par livre (identifiant, fiche la plus récente gagnante) ; « dernier qui écrit gagne » au niveau du fichier. Le jeton reste sur l'appareil et **n'est jamais** enregistré dans le fichier.
+- À distinguer de la synchro « une bibliothèque » (bouton nuage), qui ne partage qu'une seule bibliothèque (utile pour la partager avec quelqu'un). La synchro du **compte** fait suivre l'ensemble de tes bibliothèques.
+
+### Note
+- Le cache hors-ligne passe à `mnemosyne-1.7.0`.
+
+---
+
 ## 1.6.0 « Clio » — 2026-08-06
 
 ### Ajouté
