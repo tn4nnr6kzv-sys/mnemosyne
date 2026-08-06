@@ -8,6 +8,21 @@ Format : **MAJEURE.MINEURE.PATCH**. Les versions majeures portent un nom (une Mu
 
 ---
 
+## 1.5.0 « Clio » — 2026-08-06
+
+### Ajouté
+- **Suivi de lecture** pour les livres « en cours » :
+  - Champ **page actuelle** dans la fiche, avec **jauge de progression** (page / total, %).
+  - **Jauge sur les cartes** des livres en cours (à la place des étoiles).
+  - **Carrousel « En cours de lecture »** en haut de la bibliothèque (vue par défaut), avec couverture, progression et bouton **Actualiser**.
+  - Éditeur rapide **« Où j'en suis »** : saisie de la page (curseur + boutons ±1 / ±10), total de pages modifiable, pages restantes, et bouton **« J'ai terminé »** qui bascule le livre en « Lu » (avec date de lecture du jour).
+- **Statistiques de lecture** (lien « Statistiques → » sur le bandeau de chiffres) : chiffres clés (livres, lus, en cours, à lire, pages lues, note moyenne, lus cette année / ce mois, pages/livre), répartition par étagère, progression moyenne des lectures en cours, histogramme des notes, lectures par année, top genres/tags, et repères (livre le plus long / le plus court).
+
+### Note
+- Nouveau champ `currentPage` par livre (synchronisé). Le cache hors-ligne passe à `mnemosyne-1.5.0`.
+
+---
+
 ## 1.4.0 « Clio » — 2026-08-05
 
 ### Ajouté

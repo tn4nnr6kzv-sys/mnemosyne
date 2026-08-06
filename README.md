@@ -66,6 +66,7 @@ Les données vivent dans le navigateur de l'appareil. iOS peut effacer le stocka
 - **Étagères et tags** : l'**étagère** (Lu / En cours / À lire) est le statut de lecture ; les **tags** (genre, type, thème… champ « Tags » de la fiche) sont libres. La barre de tags sous les filtres permet de les combiner avec l'étagère (un livre doit porter tous les tags cochés). Le bouton **⚙ Gérer** ouvre le gestionnaire pour renommer, fusionner ou supprimer un tag sur l'ensemble des livres.
 - **Scanner un livre** : bouton **code-barres** (en haut). Vise l'ISBN au dos du livre, ou saisis-le à la main. Si le livre est déjà enregistré, sa fiche s'ouvre ; sinon ses informations sont récupérées en ligne et la fiche d'ajout est pré-remplie. La caméra nécessite HTTPS (assuré par GitHub Pages) et l'autorisation d'accès ; la recherche des métadonnées nécessite une connexion. Le décodeur fonctionne hors-ligne une fois l'app chargée.
 - **Profils** : le nom en haut à gauche (sous le titre) est le **profil actif** ; clique dessus pour ouvrir la fenêtre **Profils**. Chaque profil a sa propre bibliothèque et sa propre synchronisation GitHub — pour séparer perso/pro ou partager l'appareil. Un profil n'est pas protégé par mot de passe (données lisibles sur l'appareil).
+- **Suivi de lecture** : pour un livre « en cours », renseigne la **page actuelle** (dans la fiche, ou via le carrousel « En cours de lecture » → **Actualiser**). La progression s'affiche en jauge ; « **J'ai terminé** » bascule le livre en « Lu ». Le lien **Statistiques →** (sur le bandeau de chiffres) ouvre les statistiques de lecture.
 - **Tout est un seul fichier** (`index.html`) : facile à bidouiller. Le nom, les couleurs (variables CSS en haut du `<style>`) et les libellés se changent en deux minutes.
 
 ---
@@ -106,13 +107,13 @@ Mnémosyne suit le format **MAJEURE.MINEURE.PATCH** :
 La version courante est affichée sous le titre et dans **Données → à propos**. Elle est définie à un seul endroit dans `index.html` :
 
 ```js
-const APP_VERSION = "1.4.0";
+const APP_VERSION = "1.5.0";
 const APP_CODENAME = "Clio";
 ```
 
 Le nom du cache hors-ligne (`sw.js`) reprend le numéro de version, de sorte que chaque release remplace proprement l'ancien cache. L'historique complet est dans **`CHANGELOG.md`**.
 
-Version actuelle : **1.4.0 « Clio »** (Clio, Muse de l'Histoire).
+Version actuelle : **1.5.0 « Clio »** (Clio, Muse de l'Histoire).
 
 L'historique complet est dans **`CHANGELOG.md`**.
 
